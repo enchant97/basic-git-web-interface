@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ repo_name }}</title>
+</head>
+<body>
+    <h1>{{ repo_name }}</h1>
+    <ul>
+        {% for log in logs %}
+        <li>{{ log.subject }} - {{ log.commit_hash[:7] }}</li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
