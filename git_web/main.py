@@ -11,6 +11,8 @@ from .git.utils import find_repos, init_repo
 app = Quart(__name__)
 
 REPOS_PATH = Path(os.environ["REPOS_PATH"])
+# should look similar to: git@example.com
+REPOS_SSH_BASE = os.environ["REPOS_SSH_BASE"]
 
 
 @app.route("/")
@@ -71,10 +73,13 @@ async def repo_view(repo_dir: str, repo_name: str):
     repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
     if not repo_path.exists():
         abort(404)
+
+    ssh_url = REPOS_SSH_BASE + ":" + str(repo_path.relative_to(REPOS_PATH))
     return await render_template(
         "repository.html",
         repo_dir=repo_dir,
-        repo_name=repo_name
+        repo_name=repo_name,
+        ssh_url=ssh_url
         )
 
 
