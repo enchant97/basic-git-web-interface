@@ -26,6 +26,9 @@ def find_repos(repo_dir, make_relative: bool = False):
         ],
         capture_output=True).stdout.decode().strip()
     found = found.split("\n")
+    if found[0] == "":
+        # directory is empty
+        return
     if make_relative:
         for path in found:
             yield Path(path).relative_to(repo_dir)

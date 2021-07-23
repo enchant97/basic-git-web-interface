@@ -2,6 +2,12 @@
 {% block title %}{{ directory }}{% endblock %}
 {% block title2 %}Repositories{% endblock %}
 {% block main %}
+<form action="{{ url_for('repo_init', repo_dir=directory) }}" method="post">
+    <label for="repo-name">Name</label>
+    <input type="text" name="repo-name" id="repo-name" required>
+    <button type="submit">Create</button>
+</form>
+
 <ul>
     {% for path in repo_paths %}
     <li><a href="{{ url_for('repo_view', repo_dir=directory, repo_name=path.stem) }}">{{ path.stem }}</a></li>

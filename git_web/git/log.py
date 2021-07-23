@@ -30,7 +30,9 @@ def process_logs(stdout: str):
 
 
 def run_get_logs(git_repo: Path):
-    stdout = subprocess.run(
+    process_status = subprocess.run(
         ["git", "-C", str(git_repo), "log", "--pretty=%H;;%ae;;%cI;;%s"],
-        capture_output=True).stdout.decode()
+        capture_output=True)
+    # TODO handle empty repos
+    stdout = process_status.stdout.decode()
     return process_logs(stdout)

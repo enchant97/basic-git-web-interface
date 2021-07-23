@@ -2,7 +2,7 @@ import os
 from pathlib import Path
 
 from quart import (Quart, abort, make_response, redirect, render_template,
-                   url_for)
+                   request, url_for)
 
 from .git.archive import ArchiveTypes, run_get_archive
 from .git.log import run_get_logs
@@ -19,6 +19,42 @@ async def directory_list():
         "directories.html",
         dir_paths=os.listdir(REPOS_PATH)
     )
+
+@app.route("/new", methods=["POST"])
+async def new_directory():
+    repo_dir = (await request.form).get("repo-dir")
+
+    if not repo_dir:
+        abort(400)
+
+    full_path = REPOS_PATH / repo_dir
+
+    if full_path.exists():
+        abort(400, "already exists")
+
+    full_path.mkdir()
+
+    return redirect(url_for(".repo_list", directory=repo_dir))
+
+
+@app.route("/<repo_dir>/new", methods=["POST"])
+async def repo_init(repo_dir: str):
+    if not (REPOS_PATH / repo_dir).exists():
+        abort(404)
+
+    repo_name = (await request.form).get("repo-name")
+    if not repo_name:
+        abort(400)
+
+    if (REPOS_PATH / repo_dir / (repo_name + ".git")).exists():
+        abort(400, "already exists")
+
+    init_repo(REPOS_PATH / repo_dir, repo_name)
+    return redirect(
+        url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name)
+    )
+
+
 
 @app.route("/<directory>/repos")
 async def repo_list(directory):
@@ -71,11 +107,3 @@ async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     response = await make_response(content)
     response.mimetype = "application/" + archive_type
     return response
-
-
-@app.route("/init/<repo_name>")
-async def repo_init(repo_name: str):
-    if (REPOS_PATH / (repo_name + ".git")).exists():
-        abort(400, "already exists")
-    init_repo(REPOS_PATH, repo_name)
-    return redirect(url_for(".repo_logs", repo_name=repo_name))
