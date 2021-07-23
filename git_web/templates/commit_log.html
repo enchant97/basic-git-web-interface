@@ -1,0 +1,10 @@
+{% extends "/shared/base.html" %}
+{% block title %}{{ repo_dir }} / {{ repo_name }}{% endblock %}
+{% block title2 %}Commits{% endblock %}
+{% block main %}
+<ul>
+    {% for log in logs %}
+    <li>{{ log.subject }} - {{ log.commit_hash[:7] }}</li>
+    {% endfor %}
+</ul>
+{% endblock %}

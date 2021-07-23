@@ -1,0 +1,9 @@
+{% extends "/shared/base.html" %}
+{% block title %}Directories{% endblock %}
+{% block main %}
+<ul>
+    {% for path in dir_paths %}
+    <li><a href="{{ url_for('repo_list', directory=path) }}">{{ path }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

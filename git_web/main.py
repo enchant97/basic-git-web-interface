@@ -13,36 +13,57 @@ app = Quart(__name__)
 REPOS_PATH = Path(os.environ["REPOS_PATH"])
 
 
-@app.route("/repo")
-async def repo_list():
-    repo_paths = find_repos(REPOS_PATH, True)
+@app.route("/")
+async def directory_list():
+    return await render_template(
+        "directories.html",
+        dir_paths=os.listdir(REPOS_PATH)
+    )
+
+@app.route("/<directory>/repos")
+async def repo_list(directory):
+    repo_paths = find_repos(REPOS_PATH / directory, True)
     return await render_template(
         "repos.html",
+        directory=directory,
         repo_paths=repo_paths
     )
 
 
-@app.route("/repo/<repo_name>/logs")
-async def repo_logs(repo_name: str):
-    repo_path = REPOS_PATH / (repo_name + ".git")
+@app.route("/<repo_dir>/repos/<repo_name>")
+async def repo_view(repo_dir: str, repo_name: str):
+    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
+    if not repo_path.exists():
+        abort(404)
+    return await render_template(
+        "repository.html",
+        repo_dir=repo_dir,
+        repo_name=repo_name
+        )
+
+
+@app.route("/<repo_dir>/repos/<repo_name>/commits")
+async def repo_commit_log(repo_dir: str, repo_name: str):
+    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
     if not repo_path.exists():
         abort(404)
     logs = run_get_logs(repo_path)
     return await render_template(
-        "logs.html",
+        "commit_log.html",
         logs=logs,
+        repo_dir=repo_dir,
         repo_name=repo_name
     )
 
 
-@app.route("/repo/<repo_name>/archive.<archive_type>")
-async def repo_archive(repo_name: str, archive_type: str):
+@app.route("/<repo_dir>/repos/<repo_name>/archive.<archive_type>")
+async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     try:
         ArchiveTypes(archive_type)
     except ValueError:
         abort(404)
 
-    repo_path = REPOS_PATH / (repo_name + ".git")
+    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
     if not repo_path.exists():
         abort(404)
 

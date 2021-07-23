@@ -1,15 +1,10 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Repos</title>
-</head>
-<body>
-    <ul>
-        {% for path in repo_paths %}
-        <li><a href="{{ url_for('repo_logs', repo_name=path.stem) }}">{{ path }}</a></li>
-        {% endfor %}
-    </ul>
-</body>
-</html>
+{% extends "/shared/base.html" %}
+{% block title %}{{ directory }}{% endblock %}
+{% block title2 %}Repositories{% endblock %}
+{% block main %}
+<ul>
+    {% for path in repo_paths %}
+    <li><a href="{{ url_for('repo_view', repo_dir=directory, repo_name=path.stem) }}">{{ path.stem }}</a></li>
+    {% endfor %}
+</ul>
+{% endblock %}

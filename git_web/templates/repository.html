@@ -1,0 +1,10 @@
+{% extends "/shared/base.html" %}
+{% block title %}{{ repo_dir }} / {{ repo_name }}{% endblock %}
+{% block title2 %}Repository{% endblock %}
+{% block main %}
+<a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
+    download="{{ repo_name + '.zip' }}">Download As Zip</a>
+<a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='tar.gz') }}"
+    download="{{ repo_name + '.tar.gz' }}">Download As Tar</a>
+<a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name) }}">Commits</a>
+{% endblock %}
