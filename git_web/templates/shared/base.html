@@ -9,6 +9,10 @@
     <header>
         <h1>{{ self.title() }}</h1>
         <h2>{{ self.title2() }}</h2>
+        <nav>
+            <a href="{{ url_for('directory_list') }}">Home</a>
+            {% block nav %}{% endblock %}
+        </nav>
     </header>
     <main>{% block main %}{% endblock %}</main>
     <footer></footer>

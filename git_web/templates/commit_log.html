@@ -1,6 +1,9 @@
 {% extends "/shared/base.html" %}
 {% block title %}{{ repo_dir }} / {{ repo_name }}{% endblock %}
 {% block title2 %}Commits{% endblock %}
+{% block nav %}
+<a href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">Repository</a>
+{% endblock %}
 {% block main %}
 <ul>
     {% for log in logs %}
