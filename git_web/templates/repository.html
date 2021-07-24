@@ -2,6 +2,15 @@
 {% block title %}{{ repo_dir }} / {{ repo_name }}{% endblock %}
 {% block title2 %}Repository{% endblock %}
 {% block main %}
+<p>{{ repo_description }}</p>
+
+<form action="{{ url_for('repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+    <label for="repo-description">Description</label>
+    <input type="text" name="repo-description" id="repo-description" required>
+    <button type="submit">Set</button>
+</form>
+
+<a href="{{ url_for('repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}">Delete</a>
 <label>SSH: <input type="text" value="{{ ssh_url }}" readonly></label>
 <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
     download="{{ repo_name + '.zip' }}">Download As Zip</a>

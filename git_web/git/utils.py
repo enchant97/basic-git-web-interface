@@ -1,7 +1,8 @@
 import subprocess
-from os import path
 from pathlib import Path
 from typing import Optional
+
+import aiofiles
 
 
 def init_repo(
@@ -15,6 +16,16 @@ def init_repo(
     if default_branch:
         args.append(f"--initial-branch={default_branch}")
     subprocess.run(args).check_returncode()
+
+
+async def get_description(git_repo: Path) -> str:
+    async with aiofiles.open(git_repo / "description", "r") as fo:
+        return await fo.read()
+
+
+async def set_description(git_repo: Path, description: str):
+    async with aiofiles.open(git_repo / "description", "w") as fo:
+        return await fo.write(description)
 
 
 def find_repos(repo_dir, make_relative: bool = False):

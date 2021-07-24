@@ -1,7 +1,10 @@
+import re
 import subprocess
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+
+EMPTY_REPO_RE = r"fatal: your current branch '\w+' does not have any commits yet"
 
 
 @dataclass
@@ -33,6 +36,9 @@ def run_get_logs(git_repo: Path):
     process_status = subprocess.run(
         ["git", "-C", str(git_repo), "log", "--pretty=%H;;%ae;;%cI;;%s"],
         capture_output=True)
-    # TODO handle empty repos
+    if not process_status.stdout:
+        if re.match(EMPTY_REPO_RE, process_status.stderr.decode()):
+            return []
+        process_status.check_returncode()
     stdout = process_status.stdout.decode()
     return process_logs(stdout)

@@ -6,8 +6,8 @@ from quart import (Quart, abort, make_response, redirect, render_template,
 
 from .git.archive import ArchiveTypes, run_get_archive
 from .git.log import run_get_logs
-from .git.utils import find_repos, init_repo
-
+from .git.utils import find_repos, init_repo, get_description, set_description
+import shutil
 app = Quart(__name__)
 
 REPOS_PATH = Path(os.environ["REPOS_PATH"])
@@ -28,7 +28,7 @@ async def new_directory():
 
     if not repo_dir:
         abort(400)
-
+    repo_dir = repo_dir.strip().replace(" ", "-")
     full_path = REPOS_PATH / repo_dir
 
     if full_path.exists():
@@ -47,7 +47,7 @@ async def repo_init(repo_dir: str):
     repo_name = (await request.form).get("repo-name")
     if not repo_name:
         abort(400)
-
+    repo_name = repo_name.strip().replace(" ", "-")
     if (REPOS_PATH / repo_dir / (repo_name + ".git")).exists():
         abort(400, "already exists")
 
@@ -79,8 +79,33 @@ async def repo_view(repo_dir: str, repo_name: str):
         "repository.html",
         repo_dir=repo_dir,
         repo_name=repo_name,
-        ssh_url=ssh_url
+        ssh_url=ssh_url,
+        repo_description=await get_description(repo_path),
         )
+
+
+@app.route("/<repo_dir>/repos/<repo_name>/delete", methods=["GET"])
+async def repo_delete(repo_dir: str, repo_name: str):
+    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
+    if not repo_path.exists():
+        abort(404)
+    shutil.rmtree(repo_path)
+    return redirect(url_for(".repo_list", directory=repo_dir))
+
+
+@app.route("/<repo_dir>/repos/<repo_name>/set-description", methods=["POST"])
+async def repo_set_description(repo_dir: str, repo_name: str):
+    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
+    if not repo_path.exists():
+        abort(404)
+
+    new_description = (await request.form).get("repo-description")
+    if not new_description:
+        abort(400)
+
+    await set_description(repo_path, new_description)
+
+    return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
 
 
 @app.route("/<repo_dir>/repos/<repo_name>/commits")
