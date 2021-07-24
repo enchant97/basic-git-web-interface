@@ -2,10 +2,10 @@
 {% block title %}{{ repo_dir }} / {{ repo_name }}{% endblock %}
 {% block title2 %}Repository{% endblock %}
 {% block nav %}
-<a href="{{ url_for('repo_list', directory=repo_dir) }}">Repos</a>
+<a href="{{ url_for('repo_list', directory=repo_dir) }}" class="bnt">Repos</a>
 {% endblock %}
 {% block main %}
-<p>{{ repo_description }}</p>
+<p class="sub">{{ repo_description }}</p>
 
 <form action="{{ url_for('repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
     <label for="repo-description">Description</label>
@@ -13,11 +13,15 @@
     <button type="submit">Set</button>
 </form>
 
-<a href="{{ url_for('repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}">Delete</a>
-<label>SSH: <input type="text" value="{{ ssh_url }}" readonly></label>
-<a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
-    download="{{ repo_name + '.zip' }}">Download As Zip</a>
-<a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='tar.gz') }}"
-    download="{{ repo_name + '.tar.gz' }}">Download As Tar</a>
-<a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name) }}">Commits</a>
+<div class="sub">
+    <label>SSH: <input type="text" value="{{ ssh_url }}" readonly></label>
+    <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
+        download="{{ repo_name + '.zip' }}" class="bnt">Download As Zip</a>
+    <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='tar.gz') }}"
+        download="{{ repo_name + '.tar.gz' }}" class="bnt">Download As Tar</a>
+</div>
+<div class="sub">
+    <a href="{{ url_for('repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">Delete</a>
+    <a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">Commits</a>
+</div>
 {% endblock %}

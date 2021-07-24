@@ -1,0 +1,49 @@
+:root {
+  --bg-col: #c4c4c4;
+  --bg-sub-col: #afafaf;
+  --bnt-col: #666666;
+  --border-rad: 10px;
+}
+
+body {
+  background-color: var(--bg-col);
+}
+
+header {
+  margin-bottom: 30px;
+}
+
+header nav {
+  display: flex;
+  gap: 15px;
+}
+
+button,
+.bnt {
+  border-radius: var(--border-rad);
+  padding: 10px;
+  color: white;
+  text-decoration: none;
+  background-color: var(--bnt-col);
+  border: none;
+}
+
+button:hover,
+.bnt:hover {
+  background-color: black;
+  cursor: pointer;
+}
+
+form,
+.sub {
+  border-radius: var(--border-rad);
+  background-color: var(--bg-sub-col);
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.down {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

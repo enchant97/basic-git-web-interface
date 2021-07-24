@@ -2,12 +2,12 @@
 {% block title %}{{ repo_dir }} / {{ repo_name }}{% endblock %}
 {% block title2 %}Commits{% endblock %}
 {% block nav %}
-<a href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">Repository</a>
+<a href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">Repository</a>
 {% endblock %}
 {% block main %}
-<ul>
+<div class="sub down">
     {% for log in logs %}
-    <li>{{ log.subject }} - {{ log.commit_hash[:7] }}</li>
+    <div class="bnt">{{ log.subject }} - {{ log.commit_hash[:7] }}</div>
     {% endfor %}
-</ul>
+</div>
 {% endblock %}

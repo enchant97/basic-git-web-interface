@@ -8,9 +8,9 @@
     <button type="submit">Create</button>
 </form>
 
-<ul>
+<div class="sub down">
     {% for path in repo_paths %}
-    <li><a href="{{ url_for('repo_view', repo_dir=directory, repo_name=path.stem) }}">{{ path.stem }}</a></li>
+    <a href="{{ url_for('repo_view', repo_dir=directory, repo_name=path.stem) }}" class="bnt">{{ path.stem }}</a>
     {% endfor %}
-</ul>
+</div>
 {% endblock %}
