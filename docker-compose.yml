@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+  web:
+    build .
+    restart: unless-stopped
+    container_name: git_web
+    ports:
+      - 8000:8000
+    environment:
+      # change this to you ssh domain
+      - REPOS_SSH_BASE=git@example.com
+      # make sure you change this
+      - LOGIN_PASSWORD=changeme1234
+      # make sure you change this
+      - SECRET_KEY=mysecret124
+    volumes:
+      # change this to where you
+      # store your bare repositories
+      - /home/git/repos:/data/repos
