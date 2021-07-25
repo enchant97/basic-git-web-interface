@@ -151,6 +151,22 @@ async def repo_set_description(repo_dir: str, repo_name: str):
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
 
 
+@app.route("/<repo_dir>/repos/<repo_name>/set-name", methods=["POST"])
+@login_required
+async def repo_set_name(repo_dir: str, repo_name: str):
+    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
+    if not repo_path.exists():
+        abort(404)
+
+    new_name = (await request.form).get("repo-name")
+    if not new_name:
+        abort(400)
+    new_name = new_name.strip().replace(" ", "-")
+    repo_path.rename(REPOS_PATH / repo_dir / (new_name + ".git"))
+
+    return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
+
+
 @app.route("/<repo_dir>/repos/<repo_name>/commits")
 @login_required
 async def repo_commit_log(repo_dir: str, repo_name: str):

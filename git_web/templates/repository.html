@@ -13,6 +13,12 @@
     <button type="submit">Set</button>
 </form>
 
+<form action="{{ url_for('repo_set_name', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+    <label for="repo-name">Name</label>
+    <input type="text" name="repo-name" id="repo-name" required>
+    <button type="submit">Set</button>
+</form>
+
 <div class="sub">
     <label>SSH: <input type="text" value="{{ ssh_url }}" readonly></label>
     <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
