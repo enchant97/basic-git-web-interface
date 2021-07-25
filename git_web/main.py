@@ -9,7 +9,8 @@ from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
 
 from .git.archive import ArchiveTypes, run_get_archive
 from .git.log import run_get_logs
-from .git.utils import find_repos, get_description, init_repo, set_description
+from .git.utils import (find_repos, get_description, init_repo,
+                        run_maintenance, set_description)
 from .helpers import get_config
 
 app = Quart(__name__)
@@ -166,6 +167,16 @@ async def repo_set_name(repo_dir: str, repo_name: str):
     repo_path.rename(REPOS_PATH / repo_dir / (new_name + ".git"))
 
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
+
+
+@app.route("/<repo_dir>/repos/<repo_name>/maintenance")
+@login_required
+async def repo_maintenance_run(repo_dir: str, repo_name: str):
+    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
+    if not repo_path.exists():
+        abort(404)
+    run_maintenance(repo_path)
+    return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
 
 
 @app.route("/<repo_dir>/repos/<repo_name>/commits")

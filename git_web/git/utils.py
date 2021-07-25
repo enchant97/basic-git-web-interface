@@ -28,6 +28,13 @@ async def set_description(git_repo: Path, description: str):
         return await fo.write(description)
 
 
+def run_maintenance(git_repo: Path) -> str:
+    args = ["git", "-C", str(git_repo), "maintenance", "run"]
+    process = subprocess.run(args, capture_output=True)
+    process.check_returncode()
+    return process.stdout
+
+
 def find_repos(repo_dir, make_relative: bool = False):
     found = subprocess.run(
         [
