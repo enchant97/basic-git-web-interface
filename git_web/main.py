@@ -5,7 +5,8 @@ from pathlib import Path
 
 from quart import (Quart, abort, make_response, redirect, render_template,
                    request, url_for)
-from quart_auth import AuthManager, AuthUser, Unauthorized, login_required, login_user
+from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
+                        login_user, logout_user)
 
 from .git.archive import ArchiveTypes, run_get_archive
 from .git.log import run_get_logs
@@ -41,6 +42,13 @@ async def do_login():
         return redirect(url_for(".directory_list"))
 
     return await render_template("login.html")
+
+
+@app.route("/logout")
+@login_required
+async def do_logout():
+    logout_user()
+    return redirect(url_for(".do_login"))
 
 
 @app.route("/")
