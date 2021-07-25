@@ -1,7 +1,6 @@
 import os
 import secrets
 import shutil
-from pathlib import Path
 
 from quart import (Quart, abort, make_response, redirect, render_template,
                    request, url_for)
@@ -11,16 +10,17 @@ from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
 from .git.archive import ArchiveTypes, run_get_archive
 from .git.log import run_get_logs
 from .git.utils import find_repos, get_description, init_repo, set_description
+from .helpers import get_config
 
 app = Quart(__name__)
 auth_manager = AuthManager(app)
 
-REPOS_PATH = Path(os.environ["REPOS_PATH"])
+REPOS_PATH = get_config().REPOS_PATH
 # should look similar to: git@example.com
-REPOS_SSH_BASE = os.environ["REPOS_SSH_BASE"]
+REPOS_SSH_BASE = get_config().REPOS_SSH_BASE
 # password preventing unwanted access
-LOGIN_PASSWORD = os.environ["LOGIN_PASSWORD"]
-app.secret_key = os.environ["SECRET_KEY"]
+LOGIN_PASSWORD = get_config().LOGIN_PASSWORD
+app.secret_key = get_config().SECRET_KEY
 # this is allowing us to run through a proxy
 app.config["QUART_AUTH_COOKIE_SECURE"] = False
 
@@ -56,8 +56,9 @@ async def do_logout():
 async def directory_list():
     return await render_template(
         "directories.html",
-        dir_paths=os.listdir(REPOS_PATH)
+        dir_paths=next(os.walk(REPOS_PATH))[1]
     )
+
 
 @app.route("/new", methods=["POST"])
 @login_required
