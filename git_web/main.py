@@ -11,7 +11,7 @@ from .git.archive import ArchiveTypes, run_get_archive
 from .git.log import run_get_logs
 from .git.utils import (find_repos, get_description, init_repo,
                         run_maintenance, set_description)
-from .helpers import get_config
+from .helpers import get_config, is_allowed_dir
 
 app = Quart(__name__)
 auth_manager = AuthManager(app)
@@ -57,7 +57,7 @@ async def do_logout():
 async def directory_list():
     return await render_template(
         "directories.html",
-        dir_paths=next(os.walk(REPOS_PATH))[1]
+        dir_paths=filter(is_allowed_dir, next(os.walk(REPOS_PATH))[1])
     )
 
 

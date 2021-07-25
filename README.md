@@ -6,13 +6,16 @@ It has been designed to run through docker and it is recommended to run through 
 ## Config
 All configs are handled through environment variables.
 
-| Name           | Description                 | Default     |
-|:---------------|:----------------------------|:------------|
-| REPOS_PATH     | Where the repos are stored  | /data/repos |
-| REPOS_SSH_BASE | SSH username and domain     |             |
-| LOGIN_PASSWORD | Password to login with      |             |
-| SECRET_KEY     | Server secret key           |             |
-| WORKERS        | Number of Hypercorn workers | 1           |
+| Name            | Description                 | Default     |
+|:----------------|:----------------------------|:------------|
+| REPOS_PATH      | Where the repos are stored  | /data/repos |
+| REPOS_SSH_BASE  | SSH username and domain     |             |
+| LOGIN_PASSWORD  | Password to login with      |             |
+| SECRET_KEY      | Server secret key           |             |
+| DISALLOWED_DIRS | any directory names to hide |             |
+| WORKERS         | Number of Hypercorn workers | 1           |
+
+> DISALLOWED_DIRS could be e.g. DISALLOWED_DIRS=".ssh,my-secrets"
 
 ## License
 Copyright (C) 2021 Leo Spratt

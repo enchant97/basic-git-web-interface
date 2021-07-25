@@ -14,6 +14,7 @@ class Config:
     REPOS_SSH_BASE: str
     LOGIN_PASSWORD: str
     SECRET_KEY: str
+    DISALLOWED_DIRS: list[str]
 
 
 @cache
@@ -30,6 +31,7 @@ def get_config() -> Config:
             REPOS_SSH_BASE=os.environ["REPOS_SSH_BASE"],
             LOGIN_PASSWORD=os.environ["LOGIN_PASSWORD"],
             SECRET_KEY=os.environ["SECRET_KEY"],
+            DISALLOWED_DIRS=os.environ.get("DISALLOWED_DIRS", "").split(","),
         )
     except KeyError:
         print("missing required configs", file=sys.stderr)
@@ -37,3 +39,9 @@ def get_config() -> Config:
     except ValueError:
         print("config in wrong format", file=sys.stderr)
         exit(1)
+
+
+def is_allowed_dir(name: str) -> bool:
+    if name in get_config().DISALLOWED_DIRS:
+        return False
+    return True
