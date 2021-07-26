@@ -4,6 +4,12 @@ EXPOSE 8000
 ENV REPOS_PATH=/data/repos
 ENV WORKERS=1
 
+# git is required
+RUN apt-get update \
+    && apt-get install -y git \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
 # setup python environment
 COPY requirements.txt requirements.txt
 
