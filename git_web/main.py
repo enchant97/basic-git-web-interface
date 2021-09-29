@@ -16,6 +16,9 @@ from .helpers import get_config, is_allowed_dir
 app = Quart(__name__)
 auth_manager = AuthManager(app)
 
+# the default branch name
+DEFAULT_BRANCH = get_config().DEFAULT_BRANCH
+# the root directory where repos will be stored
 REPOS_PATH = get_config().REPOS_PATH
 # should look similar to: git@example.com
 REPOS_SSH_BASE = get_config().REPOS_SSH_BASE
@@ -92,7 +95,7 @@ async def repo_init(repo_dir: str):
     if (REPOS_PATH / repo_dir / (repo_name + ".git")).exists():
         abort(400, "already exists")
 
-    init_repo(REPOS_PATH / repo_dir, repo_name)
+    init_repo(REPOS_PATH / repo_dir, repo_name, True, DEFAULT_BRANCH)
     return redirect(
         url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name)
     )

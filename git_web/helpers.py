@@ -15,6 +15,7 @@ class Config:
     LOGIN_PASSWORD: str
     SECRET_KEY: str
     DISALLOWED_DIRS: list[str]
+    DEFAULT_BRANCH: str
 
 
 @cache
@@ -32,6 +33,7 @@ def get_config() -> Config:
             LOGIN_PASSWORD=os.environ["LOGIN_PASSWORD"],
             SECRET_KEY=os.environ["SECRET_KEY"],
             DISALLOWED_DIRS=os.environ.get("DISALLOWED_DIRS", "").split(","),
+            DEFAULT_BRANCH=os.environ.get("DEFAULT_BRANCH", "main"),
         )
     except KeyError:
         print("missing required configs", file=sys.stderr)

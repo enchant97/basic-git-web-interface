@@ -13,6 +13,7 @@ All configs are handled through environment variables.
 | LOGIN_PASSWORD  | Password to login with      |             |
 | SECRET_KEY      | Server secret key           |             |
 | DISALLOWED_DIRS | any directory names to hide |             |
+| DEFAULT_BRANCH  | the default branch name     | main        |
 | WORKERS         | Number of Hypercorn workers | 1           |
 
 > DISALLOWED_DIRS could be e.g. DISALLOWED_DIRS=".ssh,my-secrets"
