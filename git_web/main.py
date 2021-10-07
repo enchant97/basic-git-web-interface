@@ -2,16 +2,15 @@ import os
 import secrets
 import shutil
 
+from git_interface.log import get_logs
+from git_interface.utils import (ArchiveTypes, get_archive, get_description,
+                                 init_repo, run_maintenance, set_description)
 from quart import (Quart, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
                         login_user, logout_user)
 
-from .git.archive import ArchiveTypes, run_get_archive
-from .git.log import run_get_logs
-from .git.utils import (find_repos, get_description, init_repo,
-                        run_maintenance, set_description)
-from .helpers import get_config, is_allowed_dir
+from .helpers import find_repos, get_config, is_allowed_dir
 
 app = Quart(__name__)
 auth_manager = AuthManager(app)
@@ -101,7 +100,6 @@ async def repo_init(repo_dir: str):
     )
 
 
-
 @app.route("/<directory>/repos")
 @login_required
 async def repo_list(directory):
@@ -126,8 +124,8 @@ async def repo_view(repo_dir: str, repo_name: str):
         repo_dir=repo_dir,
         repo_name=repo_name,
         ssh_url=ssh_url,
-        repo_description=await get_description(repo_path),
-        )
+        repo_description=get_description(repo_path),
+    )
 
 
 @app.route("/<repo_dir>/repos/<repo_name>/delete", methods=["GET"])
@@ -151,7 +149,7 @@ async def repo_set_description(repo_dir: str, repo_name: str):
     if not new_description:
         abort(400)
 
-    await set_description(repo_path, new_description)
+    set_description(repo_path, new_description)
 
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
 
@@ -188,7 +186,7 @@ async def repo_commit_log(repo_dir: str, repo_name: str):
     repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
     if not repo_path.exists():
         abort(404)
-    logs = run_get_logs(repo_path)
+    logs = get_logs(repo_path)
     return await render_template(
         "commit_log.html",
         logs=logs,
@@ -209,7 +207,7 @@ async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     if not repo_path.exists():
         abort(404)
 
-    content = run_get_archive(repo_path, archive_type)
+    content = get_archive(repo_path, archive_type)
     response = await make_response(content)
     response.mimetype = "application/" + archive_type
     return response

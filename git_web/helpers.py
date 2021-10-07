@@ -1,4 +1,5 @@
 import os
+import subprocess
 import sys
 from dataclasses import dataclass
 from functools import cache
@@ -47,3 +48,23 @@ def is_allowed_dir(name: str) -> bool:
     if name in get_config().DISALLOWED_DIRS:
         return False
     return True
+
+
+def find_repos(repo_dir, make_relative: bool = False):
+    found = subprocess.run(
+        [
+            "find", str(repo_dir), "-path", "*.git/*",
+            "-prune", "-false", "-o", "-type", "d",
+            "-name", "*.git", "-print"
+        ],
+        capture_output=True).stdout.decode().strip()
+    found = found.split("\n")
+    if found[0] == "":
+        # directory is empty
+        return
+    if make_relative:
+        for path in found:
+            yield Path(path).relative_to(repo_dir)
+    else:
+        for path in found:
+            yield Path(path)
