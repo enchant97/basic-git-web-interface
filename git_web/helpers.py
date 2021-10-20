@@ -50,18 +50,16 @@ def is_allowed_dir(name: str) -> bool:
     return True
 
 
-def find_repos(repo_dir, make_relative: bool = False):
-    found = subprocess.run(
-        [
-            "find", str(repo_dir), "-path", "*.git/*",
-            "-prune", "-false", "-o", "-type", "d",
-            "-name", "*.git", "-print"
-        ],
-        capture_output=True).stdout.decode().strip()
-    found = found.split("\n")
-    if found[0] == "":
-        # directory is empty
-        return
+def find_repos(repo_dir: Path, make_relative: bool = False):
+    """
+    Find git bare repos (.git) in given directory,
+    will not recurse.
+
+        :param repo_dir: Directory to search in
+        :param make_relative: Whether to make path relative, defaults to False
+        :yield: The found repo
+    """
+    found = repo_dir.glob("*.git")
     if make_relative:
         for path in found:
             yield Path(path).relative_to(repo_dir)
