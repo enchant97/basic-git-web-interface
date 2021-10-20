@@ -1,10 +1,12 @@
 import os
 import secrets
 import shutil
-from git_interface.exceptions import NoBranchesException, UnknownRevisionException
 
-from git_interface.log import get_logs
 from git_interface.branch import get_branches
+from git_interface.exceptions import (NoBranchesException,
+                                      UnknownRevisionException)
+from git_interface.log import get_logs
+from git_interface.ls import ls_tree
 from git_interface.utils import (ArchiveTypes, get_archive, get_description,
                                  init_repo, run_maintenance, set_description)
 from quart import (Quart, abort, make_response, redirect, render_template,
@@ -113,9 +115,10 @@ async def repo_list(directory):
     )
 
 
-@app.route("/<repo_dir>/repos/<repo_name>")
+@app.route("/<repo_dir>/repos/<repo_name>/", defaults={"branch": None})
+@app.route("/<repo_dir>/repos/<repo_name>/tree/<branch>")
 @login_required
-async def repo_view(repo_dir: str, repo_name: str):
+async def repo_view(repo_dir: str, repo_name: str, branch: str):
     repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
     if not repo_path.exists():
         abort(404)
@@ -124,18 +127,33 @@ async def repo_view(repo_dir: str, repo_name: str):
 
     head = None
     branches = None
+
     try:
         head, branches = get_branches(repo_path)
     except NoBranchesException:
         pass
+    else:
+        if branch is None:
+            branch = head
+        elif branch not in branches:
+            if head != branch:
+                abort(404)
+
+        branches = list(branches)
+        branches.append(head)
+
+    root_tree = ls_tree(repo_path, branch, False, False)
 
     return await render_template(
         "repository.html",
         repo_dir=repo_dir,
         repo_name=repo_name,
+        curr_branch=branch,
         head=head,
+        branches=branches,
         ssh_url=ssh_url,
         repo_description=get_description(repo_path),
+        root_tree=root_tree,
     )
 
 
@@ -202,6 +220,7 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
         return await render_template(
             "commit_log.html",
             logs=logs,
+            curr_branch=branch,
             repo_dir=repo_dir,
             repo_name=repo_name
         )

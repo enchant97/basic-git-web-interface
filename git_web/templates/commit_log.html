@@ -1,9 +1,9 @@
 {% extends "/shared/base.html" %}
-{% block title %}{{ repo_dir }} / {{ repo_name }}{% endblock %}
+{% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
 {% block title2 %}Commits{% endblock %}
-{% block nav %}
-<a href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">Repository</a>
-{% endblock %}
+{% block header_one %}<a href="{{ url_for('repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
+    href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a>{% endblock %}
+{% block header_three %}{{ curr_branch }}{% endblock %}
 {% block main %}
 <div class="sub down">
     {% for log in logs %}
