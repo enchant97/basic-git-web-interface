@@ -34,6 +34,7 @@
     {% endif %}
 </div>
 
+{% if root_tree %}
 <table class="sub">
     <thead>
         <tr>
@@ -50,4 +51,5 @@
         {% endfor %}
     </tbody>
 </table>
+{% endif %}
 {% endblock %}

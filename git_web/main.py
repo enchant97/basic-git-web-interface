@@ -127,6 +127,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
 
     head = None
     branches = None
+    root_tree = None
 
     try:
         head, branches = get_branches(repo_path)
@@ -142,7 +143,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         branches = list(branches)
         branches.append(head)
 
-    root_tree = ls_tree(repo_path, branch, False, False)
+        root_tree = ls_tree(repo_path, branch, False, False)
 
     return await render_template(
         "repository.html",
