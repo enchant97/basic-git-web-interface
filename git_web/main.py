@@ -1,8 +1,10 @@
 import os
 import secrets
 import shutil
+from git_interface.exceptions import NoBranchesException, UnknownRevisionException
 
 from git_interface.log import get_logs
+from git_interface.branch import get_branches
 from git_interface.utils import (ArchiveTypes, get_archive, get_description,
                                  init_repo, run_maintenance, set_description)
 from quart import (Quart, abort, make_response, redirect, render_template,
@@ -119,10 +121,19 @@ async def repo_view(repo_dir: str, repo_name: str):
         abort(404)
 
     ssh_url = REPOS_SSH_BASE + ":" + str(repo_path.relative_to(REPOS_PATH))
+
+    head = None
+    branches = None
+    try:
+        head, branches = get_branches(repo_path)
+    except NoBranchesException:
+        pass
+
     return await render_template(
         "repository.html",
         repo_dir=repo_dir,
         repo_name=repo_name,
+        head=head,
         ssh_url=ssh_url,
         repo_description=get_description(repo_path),
     )
@@ -180,19 +191,22 @@ async def repo_maintenance_run(repo_dir: str, repo_name: str):
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
 
 
-@app.route("/<repo_dir>/repos/<repo_name>/commits")
+@app.route("/<repo_dir>/repos/<repo_name>/commits/<branch>")
 @login_required
-async def repo_commit_log(repo_dir: str, repo_name: str):
-    repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
-    if not repo_path.exists():
+async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
+    try:
+        repo_path = REPOS_PATH / repo_dir / (repo_name + ".git")
+        if not repo_path.exists():
+            abort(404)
+        logs = get_logs(repo_path, branch)
+        return await render_template(
+            "commit_log.html",
+            logs=logs,
+            repo_dir=repo_dir,
+            repo_name=repo_name
+        )
+    except UnknownRevisionException:
         abort(404)
-    logs = get_logs(repo_path)
-    return await render_template(
-        "commit_log.html",
-        logs=logs,
-        repo_dir=repo_dir,
-        repo_name=repo_name
-    )
 
 
 @app.route("/<repo_dir>/repos/<repo_name>/archive.<archive_type>")
