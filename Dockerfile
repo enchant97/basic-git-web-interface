@@ -20,4 +20,4 @@ RUN --mount=type=cache,target=/root/.cache \
 
 COPY git_web git_web
 
-CMD hypercorn git_web.main:app --bind '0.0.0.0:8000' --workers "$WORKERS"
+CMD hypercorn 'git_web.main:create_app()' --bind '0.0.0.0:8000' --workers "$WORKERS"
