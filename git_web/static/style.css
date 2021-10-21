@@ -7,6 +7,9 @@
 
 body {
   background-color: var(--bg-col);
+  max-width: 1000px;
+  margin: auto;
+  padding: 12px;
 }
 
 header {
@@ -16,6 +19,10 @@ header {
 header nav {
   display: flex;
   gap: 15px;
+}
+
+header nav :nth-child(2) {
+  margin-left: auto;
 }
 
 button,
@@ -42,8 +49,73 @@ form,
   margin-bottom: 15px;
 }
 
+table {
+  text-align: left;
+}
+
+footer {
+  text-align: center;
+  margin-top: 100px;
+  border-top-style: solid;
+  padding-top: 10px;
+}
+
+.feather-icon {
+  width: 24px;
+  height: 18px;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  fill: none;
+}
+
 .down {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.control-bar {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.repo {
+  display: flex;
+  gap: 14px;
+}
+
+.repo .main {
+  width: 100%;
+}
+
+.repo .aside {
+  max-width: 25%;
+}
+
+.tree-nav {
+  display: flex;
+  align-items: center;
+}
+
+.tree-nav :last-child {
+  margin-left: auto;
+}
+
+@media(min-width:800px) {
+  .repo .aside {
+    max-width: 35%;
+  }
+}
+
+@media(max-width:610px) {
+  .repo {
+    flex-direction: column;
+  }
+
+  .repo .aside {
+    max-width: 100%;
+  }
 }

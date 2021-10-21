@@ -19,6 +19,7 @@ All configs are handled through environment variables.
 > DISALLOWED_DIRS could be e.g. DISALLOWED_DIRS=".ssh,my-secrets"
 
 ## License
+### Code
 Copyright (C) 2021 Leo Spratt
 
 This program is free software: you can redistribute it and/or modify
@@ -33,3 +34,6 @@ GNU General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+### Assets
+- feather-sprite.svg [@4.28.0](https://github.com/feathericons/feather) (MIT) Copyright (c) 2013-2017 Cole Bemis

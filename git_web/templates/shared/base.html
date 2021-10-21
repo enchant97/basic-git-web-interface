@@ -1,17 +1,21 @@
+{% import "/shared/macros.html" as macros %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title2 %}{% endblock %} {% block title %}{% endblock %} | Basic Git Web Server</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
+
 <body>
     <header>
         <nav>
             {% if current_user.is_authenticated %}
-            <a href="{{ url_for('directory_list') }}" class="bnt">Home</a>
-            <a href="{{ url_for('do_logout') }}" class="bnt">Logout</a>
+            <a href="{{ url_for('directory_list') }}" class="bnt" title="Home">{{ macros.feather_img('home') }}</a>
+            {# TODO: add repo creation button here instead #}
+            <a href="{{ url_for('do_logout') }}" class="bnt" title="Logout">{{ macros.feather_img('log-out') }}</a>
             {% endif %}
             {% block nav %}{% endblock %}
         </nav>
@@ -20,6 +24,8 @@
         <h3>{% block header_three %}{% endblock %}</h3>
     </header>
     <main>{% block main %}{% endblock %}</main>
-    <footer></footer>
+    <footer>Running Basic Git Web Server, provided by <strong><a
+                href="https://github.com/enchant97">enchant97</a></strong></footer>
 </body>
+
 </html>

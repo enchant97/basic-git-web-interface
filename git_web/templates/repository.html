@@ -3,53 +3,93 @@
 {% block title2 %}Repository{% endblock %}
 {% block header_one %}<a href="{{ url_for('repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
     href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a>{% endblock %}
-{% block header_three %}{{ curr_branch }}{% endblock %}
 {% block main %}
-<p class="sub">{{ repo_description }}</p>
-
-<form action="{{ url_for('repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
-    <label for="repo-description">Description</label>
-    <input type="text" name="repo-description" id="repo-description" required>
-    <button type="submit">Set</button>
-</form>
-
-<form action="{{ url_for('repo_set_name', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
-    <label for="repo-name">Name</label>
-    <input type="text" name="repo-name" id="repo-name" required>
-    <button type="submit">Set</button>
-</form>
-
-<div class="sub">
-    <label>SSH: <input type="text" value="{{ ssh_url }}" readonly></label>
-    <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
-        download="{{ repo_name + '.zip' }}" class="bnt">Download As Zip</a>
-    <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='tar.gz') }}"
-        download="{{ repo_name + '.tar.gz' }}" class="bnt">Download As Tar</a>
+<div class="repo">
+    <div class="main down">
+        <div class="control-bar">
+            <span>{{ curr_branch }}</span>
+            {# TODO: Add branch select #}
+        </div>
+        {% if root_tree %}
+        <div>
+            <div class="tree-nav">
+                <span>
+                    < last commit>
+                </span>
+                {% if head %}
+                <a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=head) }}"
+                    class="bnt" title="Commit Log">{{ macros.feather_img('list') }}</a>
+                {% endif %}
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Type</th>
+                        <th>Name</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for obj in root_tree %}
+                    <tr>
+                        <td>
+                            {% if obj.type_.value == "tree" %}
+                            {{ macros.feather_img('folder') }}
+                            {% else %}
+                            {{ macros.feather_img('file') }}
+                            {% endif %}</td>
+                        <td>{{ obj.file }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div>
+            <p>No Commits Yet!</p>
+            <p>Clone the repo and add some commits to see them here.</p>
+        </div>
+        {% endif %}
+    </div>
+    <aside class="aside">
+        <div>
+            <h3>About</h3>
+            <p>{{ repo_description }}</p>
+        </div>
+        <div>
+            <h3>Clone</h3>
+            <label>SSH: <input type="text" value="{{ ssh_url }}" readonly></label>
+        </div>
+        <div>
+            <h3>Download</h3>
+            <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
+                download="{{ repo_name + '.zip' }}" class="bnt">{{ macros.feather_img('download') }} Zip</a>
+            <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='tar.gz') }}"
+                download="{{ repo_name + '.tar.gz' }}" class="bnt">{{ macros.feather_img('download') }} Tar</a>
+        </div>
+    </aside>
 </div>
-<div class="sub">
-    <a href="{{ url_for('repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">Delete</a>
-    {% if head %}
-    <a href="{{ url_for('repo_maintenance_run', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">Run Maintenance</a>
-    <a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=head) }}" class="bnt">Commits</a>
-    {% endif %}
-</div>
 
-{% if root_tree %}
-<table class="sub">
-    <thead>
-        <tr>
-            <th>Type</th>
-            <th>Name</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for obj in root_tree %}
-        <tr>
-            <td>{{ obj.type_.value }}</td>
-            <td>{{ obj.file }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
-{% endif %}
+<div>
+    <h3>Admin</h3>
+    <div class="control-bar">
+        <a href="{{ url_for('repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt"
+            title="Delete Repo">{{
+            macros.feather_img('trash-2') }}</a>
+        {% if head %}
+        <a href="{{ url_for('repo_maintenance_run', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt"
+            title="Run Maintenance">{{ macros.feather_img('tool') }}</a>
+        {% endif %}
+    </div>
+    <form action="{{ url_for('repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+        <label for="repo-description">Description</label>
+        <input type="text" name="repo-description" id="repo-description" required>
+        <button type="submit">{{ macros.feather_img('save') }}</button>
+    </form>
+
+    <form action="{{ url_for('repo_set_name', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+        <label for="repo-name">Name</label>
+        <input type="text" name="repo-name" id="repo-name" required>
+        <button type="submit">{{ macros.feather_img('save') }}</button>
+    </form>
+</div>
 {% endblock %}
