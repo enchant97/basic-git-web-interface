@@ -2,13 +2,21 @@
 {% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
 {% block title2 %}Repository{% endblock %}
 {% block header_one %}<a href="{{ url_for('repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
-    href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a>{% endblock %}
+    href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}">{{ repo_name }}</a>{%
+endblock %}
 {% block main %}
 <div class="repo">
     <div class="main down">
         <div class="control-bar">
-            <span>{{ curr_branch }}</span>
-            {# TODO: Add branch select #}
+            <select onchange="select_navigate_to(this)" title="Branch">
+                {% if head %}
+                {% for name in branches %}
+                <option value="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=name) }}" {% if
+                    name==curr_branch %} selected {% endif %}>{% if name==head %}*{% endif %}{{
+                    name }}</option>
+                {% endfor %}
+                {% endif %}
+            </select>
         </div>
         {% if root_tree %}
         <div>
@@ -17,7 +25,7 @@
                     < last commit>
                 </span>
                 {% if head %}
-                <a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=head) }}"
+                <a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}"
                     class="bnt" title="Commit Log">{{ macros.feather_img('list') }}</a>
                 {% endif %}
             </div>

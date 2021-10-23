@@ -3,6 +3,32 @@
   --bg-sub-col: #afafaf;
   --bnt-col: #666666;
   --border-rad: 10px;
+  --header-font: 'Roboto', sans-serif;
+  --main-font: 'Open Sans', sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--header-font);
+}
+
+span,
+a,
+button,
+p,
+label,
+input,
+select,
+table,
+footer {
+  font-size: 0.9em;
+  font-family: var(--main-font);
+}
+
+a {
+  color: #1476bd;
 }
 
 body {

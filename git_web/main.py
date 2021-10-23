@@ -256,11 +256,31 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
         repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
         if not repo_path.exists():
             abort(404)
+
+        head = None
+        branches = None
+
+        try:
+            head, branches = get_branches(repo_path)
+        except NoBranchesException:
+            pass
+        else:
+            if branch is None:
+                branch = head
+            elif branch not in branches:
+                if head != branch:
+                    abort(404)
+
+            branches = list(branches)
+            branches.append(head)
+
         logs = get_logs(repo_path, branch)
         return await render_template(
             "commit_log.html",
             logs=logs,
             curr_branch=branch,
+            branches=branches,
+            head=head,
             repo_dir=repo_dir,
             repo_name=repo_name
         )
