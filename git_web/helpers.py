@@ -1,5 +1,4 @@
 import os
-import subprocess
 import sys
 from dataclasses import dataclass
 from functools import cache
@@ -66,3 +65,23 @@ def find_repos(repo_dir: Path, make_relative: bool = False):
     else:
         for path in found:
             yield Path(path)
+
+
+def combine_full_dir(repo_dir: str) -> Path:
+    return get_config().REPOS_PATH / repo_dir
+
+
+def combine_full_dir_repo(repo_dir: str, repo_name: str) -> Path:
+    return get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+
+
+def find_dirs() -> filter:
+    return filter(
+        is_allowed_dir,
+        next(os.walk(get_config().REPOS_PATH))[1]
+    )
+
+
+def create_ssh_uri(repo_path: Path) -> str:
+    return get_config().REPOS_SSH_BASE + ":" +\
+         str(repo_path.relative_to(get_config().REPOS_PATH))

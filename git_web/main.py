@@ -1,4 +1,3 @@
-import os
 import secrets
 import shutil
 
@@ -14,7 +13,8 @@ from quart import (Quart, abort, make_response, redirect, render_template,
 from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
                         login_user, logout_user)
 
-from .helpers import find_repos, get_config, is_allowed_dir
+from .helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
+                      find_dirs, find_repos, get_config)
 
 app = Quart(__name__)
 auth_manager = AuthManager()
@@ -51,7 +51,7 @@ async def do_logout():
 async def directory_list():
     return await render_template(
         "directories.html",
-        dir_paths=filter(is_allowed_dir, next(os.walk(get_config().REPOS_PATH))[1])
+        dir_paths=find_dirs()
     )
 
 
@@ -60,7 +60,7 @@ async def directory_list():
 async def get_new_repo():
     return await render_template(
         "create-repo.html",
-        dir_paths=filter(is_allowed_dir, next(os.walk(get_config().REPOS_PATH))[1]),
+        dir_paths=find_dirs()
     )
 
 
@@ -79,7 +79,7 @@ async def post_new_repo():
         if name == "" or directory == "":
             abort(400, "repo name/directory cannot be blank")
 
-        full_path = get_config().REPOS_PATH / directory
+        full_path = combine_full_dir(directory)
         name = name.strip().replace(" ", "-")
         full_repo_path = full_path / (name + ".git")
 
@@ -117,7 +117,7 @@ async def post_new_dir():
     if not repo_dir:
         abort(400)
     repo_dir = repo_dir.strip().replace(" ", "-")
-    full_path = get_config().REPOS_PATH / repo_dir
+    full_path = combine_full_dir(repo_dir)
 
     if full_path.exists():
         abort(400, "already exists")
@@ -130,7 +130,7 @@ async def post_new_dir():
 @app.get("/<directory>/delete")
 @login_required
 async def get_dir_delete(directory: str):
-    full_path = get_config().REPOS_PATH / directory
+    full_path = combine_full_dir(directory)
     if not full_path.exists():
         abort(400, "directory does not exist")
     try:
@@ -145,7 +145,7 @@ async def get_dir_delete(directory: str):
 @app.route("/<directory>/repos")
 @login_required
 async def repo_list(directory):
-    repo_paths = find_repos(get_config().REPOS_PATH / directory, True)
+    repo_paths = find_repos(combine_full_dir(directory), True)
     return await render_template(
         "repos.html",
         directory=directory,
@@ -157,12 +157,11 @@ async def repo_list(directory):
 @app.route("/<repo_dir>/repos/<repo_name>/tree/<branch>")
 @login_required
 async def repo_view(repo_dir: str, repo_name: str, branch: str):
-    repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+    repo_path = combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
-    ssh_url = get_config().REPOS_SSH_BASE + ":" +\
-         str(repo_path.relative_to(get_config().REPOS_PATH))
+    ssh_url = create_ssh_uri(repo_path)
 
     head = None
     branches = None
@@ -200,7 +199,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
 @app.route("/<repo_dir>/repos/<repo_name>/delete", methods=["GET"])
 @login_required
 async def repo_delete(repo_dir: str, repo_name: str):
-    repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+    repo_path = combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
     shutil.rmtree(repo_path)
@@ -210,7 +209,7 @@ async def repo_delete(repo_dir: str, repo_name: str):
 @app.route("/<repo_dir>/repos/<repo_name>/set-description", methods=["POST"])
 @login_required
 async def repo_set_description(repo_dir: str, repo_name: str):
-    repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+    repo_path = combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
@@ -226,7 +225,7 @@ async def repo_set_description(repo_dir: str, repo_name: str):
 @app.route("/<repo_dir>/repos/<repo_name>/set-name", methods=["POST"])
 @login_required
 async def repo_set_name(repo_dir: str, repo_name: str):
-    repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+    repo_path = combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
@@ -234,7 +233,7 @@ async def repo_set_name(repo_dir: str, repo_name: str):
     if not new_name:
         abort(400)
     new_name = new_name.strip().replace(" ", "-")
-    repo_path.rename(get_config().REPOS_PATH / repo_dir / (new_name + ".git"))
+    repo_path.rename(combine_full_dir_repo(repo_dir, new_name))
 
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
 
@@ -242,7 +241,7 @@ async def repo_set_name(repo_dir: str, repo_name: str):
 @app.route("/<repo_dir>/repos/<repo_name>/maintenance")
 @login_required
 async def repo_maintenance_run(repo_dir: str, repo_name: str):
-    repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+    repo_path = combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
     run_maintenance(repo_path)
@@ -253,7 +252,7 @@ async def repo_maintenance_run(repo_dir: str, repo_name: str):
 @login_required
 async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
     try:
-        repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+        repo_path = combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
             abort(404)
 
@@ -296,7 +295,7 @@ async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     except ValueError:
         abort(404)
 
-    repo_path = get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+    repo_path = combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
