@@ -127,6 +127,21 @@ async def post_new_dir():
     return redirect(url_for(".repo_list", directory=repo_dir))
 
 
+@app.get("/<directory>/delete")
+@login_required
+async def get_dir_delete(directory: str):
+    full_path = get_config().REPOS_PATH / directory
+    if not full_path.exists():
+        abort(400, "directory does not exist")
+    try:
+        next(full_path.iterdir())
+    except StopIteration:
+        full_path.rmdir()
+    else:
+        abort(400, "directory not empty")
+    return redirect(url_for(".directory_list"))
+
+
 @app.route("/<directory>/repos")
 @login_required
 async def repo_list(directory):
