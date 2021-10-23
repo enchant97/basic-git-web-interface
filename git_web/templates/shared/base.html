@@ -14,7 +14,8 @@
         <nav>
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('directory_list') }}" class="bnt" title="Home">{{ macros.feather_img('home') }}</a>
-            {# TODO: add repo creation button here instead #}
+            <a href="{{ url_for('get_new_dir') }}" class="bnt" title="New Directory">{{ macros.feather_img('folder-plus') }}</a>
+            <a href="{{ url_for('get_new_repo') }}" class="bnt" title="New Repo">{{ macros.feather_img('plus') }}</a>
             <a href="{{ url_for('do_logout') }}" class="bnt" title="Logout">{{ macros.feather_img('log-out') }}</a>
             {% endif %}
             {% block nav %}{% endblock %}

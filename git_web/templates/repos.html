@@ -2,12 +2,6 @@
 {% block title %}{{ directory }}{% endblock %}
 {% block title2 %}Repositories{% endblock %}
 {% block main %}
-<form action="{{ url_for('repo_init', repo_dir=directory) }}" method="post">
-    <label for="repo-name">Name</label>
-    <input type="text" name="repo-name" id="repo-name" required>
-    <button type="submit" title="Create">{{ macros.feather_img('plus') }}</button>
-</form>
-
 <div class="sub down">
     {% for path in repo_paths %}
     <a href="{{ url_for('repo_view', repo_dir=directory, repo_name=path.stem) }}" class="bnt">{{ path.stem }}</a>

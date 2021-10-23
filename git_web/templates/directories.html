@@ -1,12 +1,6 @@
 {% extends "/shared/base.html" %}
 {% block title %}Directories{% endblock %}
 {% block main %}
-<form action="{{ url_for('new_directory') }}" method="post">
-    <label for="repo-dir">Name</label>
-    <input type="text" name="repo-dir" id="repo-dir" required>
-    <button type="submit" title="Create">{{ macros.feather_img('plus') }}</button>
-</form>
-
 <div class="sub down">
     {% for path in dir_paths %}
     <a href="{{ url_for('repo_list', directory=path) }}" class="bnt">{{ path }}</a>

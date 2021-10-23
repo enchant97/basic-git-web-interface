@@ -55,10 +55,64 @@ async def directory_list():
     )
 
 
-@app.route("/new", methods=["POST"])
+@app.get("/new")
 @login_required
-async def new_directory():
-    repo_dir = (await request.form).get("repo-dir")
+async def get_new_repo():
+    return await render_template(
+        "create-repo.html",
+        dir_paths=filter(is_allowed_dir, next(os.walk(get_config().REPOS_PATH))[1]),
+    )
+
+
+@app.post("/new")
+@login_required
+async def post_new_repo():
+    try:
+        form = await request.form
+        name = form["name"]
+        directory = form["directory"]
+        description = form.get("description")
+
+        if description == "":
+            description = None
+
+        if name == "" or directory == "":
+            abort(400, "repo name/directory cannot be blank")
+
+        full_path = get_config().REPOS_PATH / directory
+        name = name.strip().replace(" ", "-")
+        full_repo_path = full_path / (name + ".git")
+
+        if not full_path.exists():
+            abort(400, "directory does not exist")
+        if full_repo_path.exists():
+            abort(400, "repo name already exists")
+    except KeyError:
+        abort(400, "missing required values")
+    except ValueError:
+        abort(400, "invalid values in form given")
+
+    init_repo(
+        full_path,
+        name,
+        True,
+        get_config().DEFAULT_BRANCH
+    )
+    if description is not None:
+        set_description(full_repo_path, description)
+    return redirect(url_for(".repo_view", repo_dir=directory, repo_name=name))
+
+
+@app.get("/new-dir")
+@login_required
+async def get_new_dir():
+    return await render_template("create-dir.html")
+
+
+@app.post("/new-dir")
+@login_required
+async def post_new_dir():
+    repo_dir = (await request.form).get("name")
 
     if not repo_dir:
         abort(400)
@@ -71,30 +125,6 @@ async def new_directory():
     full_path.mkdir()
 
     return redirect(url_for(".repo_list", directory=repo_dir))
-
-
-@app.route("/<repo_dir>/new", methods=["POST"])
-@login_required
-async def repo_init(repo_dir: str):
-    if not (get_config().REPOS_PATH / repo_dir).exists():
-        abort(404)
-
-    repo_name = (await request.form).get("repo-name")
-    if not repo_name:
-        abort(400)
-    repo_name = repo_name.strip().replace(" ", "-")
-    if (get_config().REPOS_PATH / repo_dir / (repo_name + ".git")).exists():
-        abort(400, "already exists")
-
-    init_repo(
-        get_config().REPOS_PATH / repo_dir,
-        repo_name,
-        True,
-        get_config().DEFAULT_BRANCH
-    )
-    return redirect(
-        url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name)
-    )
 
 
 @app.route("/<directory>/repos")
