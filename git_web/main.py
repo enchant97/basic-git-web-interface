@@ -2,19 +2,21 @@ import secrets
 import shutil
 
 from git_interface.branch import get_branches
-from git_interface.exceptions import (NoBranchesException,
+from git_interface.exceptions import (GitException, NoBranchesException,
                                       UnknownRevisionException)
 from git_interface.log import get_logs
 from git_interface.ls import ls_tree
-from git_interface.utils import (ArchiveTypes, get_archive, get_description,
-                                 init_repo, run_maintenance, set_description)
+from git_interface.utils import (ArchiveTypes, clone_repo, get_archive,
+                                 get_description, init_repo, run_maintenance,
+                                 set_description)
 from quart import (Quart, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
                         login_user, logout_user)
 
 from .helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
-                      find_dirs, find_repos, get_config)
+                      find_dirs, find_repos, get_config, is_valid_clone_url,
+                      pathlib_delete_ro_file)
 
 app = Quart(__name__)
 auth_manager = AuthManager()
@@ -100,6 +102,50 @@ async def post_new_repo():
     )
     if description is not None:
         set_description(full_repo_path, description)
+    return redirect(url_for(".repo_view", repo_dir=directory, repo_name=name))
+
+
+@app.get("/new/import")
+@login_required
+async def get_import_repo():
+    return await render_template(
+        "import-repo.html",
+        dir_paths=find_dirs()
+    )
+
+
+@app.post("/new/import")
+@login_required
+async def post_import_repo():
+    try:
+        form = await request.form
+        url = form["import-url"]
+        name = form["name"]
+        directory = form["directory"]
+
+        if name == "" or directory == "":
+            abort(400, "repo name/directory cannot be blank")
+
+        full_path = combine_full_dir(directory)
+        name = name.strip().replace(" ", "-")
+        full_repo_path = full_path / (name + ".git")
+
+        if not full_path.exists():
+            abort(400, "directory does not exist")
+        if full_repo_path.exists():
+            abort(400, "repo name already exists")
+
+        if not is_valid_clone_url(url):
+            abort(400, "invalid repo url given")
+
+        clone_repo(full_repo_path, url, True)
+    except KeyError:
+        abort(400, "missing required values")
+    except ValueError:
+        abort(400, "invalid values in form given")
+    except GitException:
+        abort(400, "failed to clone repo")
+
     return redirect(url_for(".repo_view", repo_dir=directory, repo_name=name))
 
 
@@ -202,7 +248,7 @@ async def repo_delete(repo_dir: str, repo_name: str):
     repo_path = combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
-    shutil.rmtree(repo_path)
+    shutil.rmtree(repo_path, onerror=pathlib_delete_ro_file)
     return redirect(url_for(".repo_list", directory=repo_dir))
 
 

@@ -1,8 +1,10 @@
 import os
+import stat
 import sys
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
+from urllib.parse import urlparse
 
 
 @dataclass
@@ -85,3 +87,15 @@ def find_dirs() -> filter:
 def create_ssh_uri(repo_path: Path) -> str:
     return get_config().REPOS_SSH_BASE + ":" +\
          str(repo_path.relative_to(get_config().REPOS_PATH))
+
+
+def is_valid_clone_url(url: str):
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return False
+    return True
+
+
+def pathlib_delete_ro_file(action, name, exc):
+    os.chmod(name, stat.S_IWRITE)
+    os.remove(name)
