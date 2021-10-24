@@ -14,6 +14,7 @@ from quart import (Quart, abort, make_response, redirect, render_template,
 from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
                         login_user, logout_user)
 
+from . import __version__
 from .helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
                       find_dirs, find_repos, get_config, is_valid_clone_url,
                       pathlib_delete_ro_file)
@@ -357,6 +358,7 @@ def create_app() -> Quart:
     app.secret_key = get_config().SECRET_KEY
     # this is allowing us to run through a proxy
     app.config["QUART_AUTH_COOKIE_SECURE"] = False
+    app.config["VERSION"] = __version__
 
     auth_manager.init_app(app)
     return app
