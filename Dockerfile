@@ -25,4 +25,4 @@ COPY git_web git_web
 CMD ./.venv/bin/hypercorn 'git_web.main:create_app()' --bind '0.0.0.0:8000' --workers "$WORKERS"
 
 HEALTHCHECK --interval=1m --start-period=30s \
-    CMD ./.venv/bin/python -m web_health_checker 'http://localhost:8000'
+    CMD ./.venv/bin/python -m web_health_checker 'http://127.0.0.1:8000/is-healthy'
