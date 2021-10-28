@@ -13,6 +13,7 @@ from quart import (Quart, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart_auth import (AuthManager, AuthUser, Unauthorized, login_required,
                         login_user, logout_user)
+from web_health_checker.contrib import quart as health_check
 
 from . import __version__
 from .helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
@@ -359,6 +360,8 @@ def create_app() -> Quart:
     # this is allowing us to run through a proxy
     app.config["QUART_AUTH_COOKIE_SECURE"] = False
     app.config["VERSION"] = __version__
+    # register blueprints
+    app.register_blueprint(health_check.blueprint, url_prefix="/")
 
     auth_manager.init_app(app)
     return app

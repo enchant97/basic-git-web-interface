@@ -3,6 +3,26 @@ This project (bgws) is designed to be basic. For example there is only one user 
 
 It has been designed to run through docker and it is recommended to run through a proxy like Nginx.
 
+## Features
+- Password protection for web-ui
+- No separate accounts
+- Create/Delete Repo Folders
+- Manage Repos
+    - Create
+    - Delete
+    - Rename
+    - List Commits
+    - View Branches
+    - Run Git Maintenance
+    - Import Repos from http/s sources (with no authentication)
+    - Download archives of repos
+    - View tree of repo
+    - SSH url generation
+- Icon based interface
+- Basic theme that is "easy on the eyes"
+- Inbuilt health check url
+- Minimal docker image (uses alpine)
+
 ## Config
 All configs are handled through environment variables.
 
