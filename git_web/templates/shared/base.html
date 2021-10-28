@@ -10,7 +10,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script src="{{ url_for('static', filename='script.js') }}" async></script>
+    <script src="{{ url_for('static', filename='theme-changer.js') }}"></script>
+    <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 
 <body>
@@ -23,6 +24,7 @@
             <a href="{{ url_for('get_new_repo') }}" class="bnt" title="New Repo">{{ macros.feather_img('plus') }}</a>
             <a href="{{ url_for('do_logout') }}" class="bnt" title="Logout">{{ macros.feather_img('log-out') }}</a>
             {% endif %}
+            <button id="themeToggleBnt" title="Change Site Theme">{{ macros.feather_img('sun') }}</button>
             {% block nav %}{% endblock %}
         </nav>
         <h1>{% block header_one %}{{ self.title() }}{% endblock %}</h1>

@@ -1,10 +1,10 @@
 :root {
+  --font-dark: black;
+  --font-light: #f0f0f0;
   --bg-col: #c4c4c4;
   --bg-sub-col: #afafaf;
   --bnt-col: #666666;
   --border-rad: 10px;
-  --font-dark: black;
-  --font-light: #f0f0f0;
   --header-font: 'Roboto', sans-serif;
   --main-font: 'Open Sans', sans-serif;
 }
