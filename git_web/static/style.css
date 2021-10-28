@@ -3,8 +3,20 @@
   --bg-sub-col: #afafaf;
   --bnt-col: #666666;
   --border-rad: 10px;
+  --font-dark: black;
+  --font-light: #f0f0f0;
   --header-font: 'Roboto', sans-serif;
   --main-font: 'Open Sans', sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --font-dark: var(--font-light);
+    --font-light: #bebebe;
+    --bg-col: #262626;
+    --bg-sub-col: #202020;
+    --bnt-col: #3d3d3d;
+  }
 }
 
 h1,
@@ -12,6 +24,7 @@ h2,
 h3,
 h4 {
   font-family: var(--header-font);
+  color: var(--font-dark);
 }
 
 span,
@@ -25,6 +38,16 @@ table,
 footer {
   font-size: 0.9em;
   font-family: var(--main-font);
+  color: var(--font-dark);
+}
+
+input,
+select {
+  border-radius: var(--border-rad);
+  border: none;
+  background-color: var(--bnt-col);
+  padding: 8px;
+  color: var(--font-light);
 }
 
 a {
@@ -55,7 +78,7 @@ button,
 .bnt {
   border-radius: var(--border-rad);
   padding: 10px;
-  color: white;
+  color: var(--font-light);
   text-decoration: none;
   background-color: var(--bnt-col);
   border: none;
