@@ -1,8 +1,8 @@
 {% extends "/shared/base.html" %}
 {% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
 {% block title2 %}Repository{% endblock %}
-{% block header_one %}<a href="{{ url_for('repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
-    href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}">{{ repo_name }}</a>{%
+{% block header_one %}<a href="{{ url_for('directory.repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
+    href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}">{{ repo_name }}</a>{%
 endblock %}
 {% block main %}
 <div class="repo">
@@ -11,7 +11,7 @@ endblock %}
             <select onchange="select_navigate_to(this)" title="Branch">
                 {% if head %}
                 {% for name in branches %}
-                <option value="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=name) }}" {% if
+                <option value="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=name) }}" {% if
                     name==curr_branch %} selected {% endif %}>{% if name==head %}*{% endif %}{{
                     name }}</option>
                 {% endfor %}
@@ -25,7 +25,7 @@ endblock %}
                     < last commit>
                 </span>
                 {% if head %}
-                <a href="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}"
+                <a href="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}"
                     class="bnt" title="Commit Log">{{ macros.feather_img('list') }}</a>
                 {% endif %}
             </div>
@@ -69,9 +69,9 @@ endblock %}
         </div>
         <div>
             <h3>Download</h3>
-            <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
+            <a href="{{ url_for('.repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='zip') }}"
                 download="{{ repo_name + '.zip' }}" class="bnt">{{ macros.feather_img('download') }} Zip</a>
-            <a href="{{ url_for('repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='tar.gz') }}"
+            <a href="{{ url_for('.repo_archive', repo_dir=repo_dir, repo_name=repo_name, archive_type='tar.gz') }}"
                 download="{{ repo_name + '.tar.gz' }}" class="bnt">{{ macros.feather_img('download') }} Tar</a>
         </div>
     </aside>
@@ -80,21 +80,21 @@ endblock %}
 <div>
     <h3>Admin</h3>
     <div class="control-bar">
-        <a href="{{ url_for('repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt"
+        <a href="{{ url_for('.repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt"
             title="Delete Repo">{{
             macros.feather_img('trash-2') }}</a>
         {% if head %}
-        <a href="{{ url_for('repo_maintenance_run', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt"
+        <a href="{{ url_for('.repo_maintenance_run', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt"
             title="Run Maintenance">{{ macros.feather_img('tool') }}</a>
         {% endif %}
     </div>
-    <form action="{{ url_for('repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+    <form action="{{ url_for('.repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
         <label for="repo-description">Description</label>
-        <input type="text" name="repo-description" id="repo-description" required>
+        <input type="text" name=".repo-description" id="repo-description" required>
         <button type="submit">{{ macros.feather_img('save') }}</button>
     </form>
 
-    <form action="{{ url_for('repo_set_name', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+    <form action="{{ url_for('.repo_set_name', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
         <label for="repo-name">Name</label>
         <input type="text" name="repo-name" id="repo-name" required>
         <button type="submit">{{ macros.feather_img('save') }}</button>

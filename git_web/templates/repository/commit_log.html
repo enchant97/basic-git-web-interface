@@ -1,14 +1,14 @@
 {% extends "/shared/base.html" %}
 {% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
 {% block title2 %}Commits{% endblock %}
-{% block header_one %}<a href="{{ url_for('repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
-    href="{{ url_for('repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}">{{ repo_name }}</a>{%
+{% block header_one %}<a href="{{ url_for('directory.repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
+    href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}">{{ repo_name }}</a>{%
 endblock %}
 {% block main %}
 <div class="control-bar">
     <select onchange="select_navigate_to(this)" title="Branch">
         {% for name in branches -%}
-        <option value="{{ url_for('repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=name) }}" {% if
+        <option value="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=name) }}" {% if
             name==curr_branch %} selected {% endif %}>{% if name==head %}*{% endif %}{{ name }}
         </option>
         {% endfor -%}

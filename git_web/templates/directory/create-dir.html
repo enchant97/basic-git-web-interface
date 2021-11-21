@@ -1,7 +1,7 @@
 {% extends "/shared/base.html" %}
 {% block title %}Create Directory{% endblock %}
 {% block main %}
-<form class="down" action="{{ url_for('post_new_dir') }}" method="post">
+<form class="down" action="{{ url_for('.post_new_dir') }}" method="post">
     <label for="new-dir-name">Name*</label>
     <input type="text" name="name" id="new-dir-name" required>
     <button type="submit">Create Directory</button>

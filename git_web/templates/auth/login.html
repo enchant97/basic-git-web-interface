@@ -2,7 +2,7 @@
 {% block title %}Login{% endblock %}
 {% block title2 %}Login is required for this service{% endblock %}
 {% block main %}
-<form action="{{ url_for('do_login') }}" method="post">
+<form action="{{ url_for('auth.post_login') }}" method="post">
     <label for="password">Password</label>
     <input type="password" name="password" id="password" placeholder="password..." required>
     <button type="submit">Login</button>

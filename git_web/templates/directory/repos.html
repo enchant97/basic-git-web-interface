@@ -4,13 +4,14 @@
 {% block main %}
 <div class="sub down">
     {% for path in repo_paths %}
-    <a href="{{ url_for('repo_view', repo_dir=directory, repo_name=path.stem) }}" class="bnt">{{ path.stem }}</a>
+    <a href="{{ url_for('repository.repo_view', repo_dir=directory, repo_name=path.stem) }}" class="bnt">{{ path.stem
+        }}</a>
     {% endfor %}
 </div>
 <div>
     <h3>Admin</h3>
     <div class="control-bar">
-        <a href="{{ url_for('get_dir_delete', directory=directory) }}" class="bnt"
+        <a href="{{ url_for('.get_dir_delete', directory=directory) }}" class="bnt"
             title="Delete Directory">{{macros.feather_img('trash-2') }}</a>
     </div>
 </div>

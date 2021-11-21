@@ -1,8 +1,8 @@
 {% extends "/shared/base.html" %}
 {% block title %}Create Repository{% endblock %}
 {% block main %}
-<form class="down" action="{{ url_for('post_new_repo') }}" method="post">
-    <a href="{{ url_for('get_import_repo') }}">Import Instead</a>
+<form class="down" action="{{ url_for('.post_new_repo') }}" method="post">
+    <a href="{{ url_for('.get_import_repo') }}">Import Instead</a>
     <label for="new-repo-name">Name*</label>
     <input type="text" name="name" id="new-repo-name" required>
     <label for="new-repo-dir">Directory*</label>
