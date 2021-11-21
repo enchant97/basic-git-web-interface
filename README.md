@@ -23,6 +23,10 @@ It has been designed to run through docker and it is recommended to run through 
 - Inbuilt health check url
 - Minimal docker image (uses alpine)
 
+## About The Repo
+- This repo uses 'main' as the develop branch and should be treating unstable or unfinished. If you want a stable release please use the tags/releases.
+- The [CHANGELOG](CHANGELOG.md) contains a history of changes that happened with each release.
+
 ## Config
 All configs are handled through environment variables.
 
