@@ -168,6 +168,27 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
     )
 
 
+@blueprint.get("/<repo_dir>/<repo_name>/settings")
+@login_required
+async def repo_settings(repo_dir: str, repo_name: str):
+    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    if not repo_path.exists():
+        abort(404)
+
+    head = None
+    try:
+        head, _ = get_branches(repo_path)
+    except NoBranchesException:
+        pass
+
+    return await render_template(
+        "/repository/settings.html",
+        repo_dir=repo_dir,
+        repo_name=repo_name,
+        head=head,
+    )
+
+
 @blueprint.route("/<repo_dir>/<repo_name>/delete", methods=["GET"])
 @login_required
 async def repo_delete(repo_dir: str, repo_name: str):
