@@ -186,6 +186,14 @@ table.tree-objects {
   display: table-row;
 }
 
+#theme-picker-selector {
+  text-align: center;
+}
+
+#theme-picker-selector .current {
+  background-color: #005e94;
+}
+
 @media(min-width:800px) {
   .repo .aside {
     max-width: 35%;
