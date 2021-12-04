@@ -127,6 +127,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
     head = None
     branches = None
     root_tree = None
+    recent_log = None
 
     try:
         head, branches = get_branches(repo_path)
@@ -143,6 +144,8 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         branches.append(head)
 
         root_tree = ls_tree(repo_path, branch, False, False)
+
+        recent_log = next(get_logs(repo_path, branch))
 
     # TODO implement more intelligent readme logic
     readme_content = ""
@@ -166,6 +169,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         repo_description=get_description(repo_path),
         root_tree=root_tree,
         readme_content=readme_content,
+        recent_log=recent_log,
     )
 
 
