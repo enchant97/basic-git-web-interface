@@ -19,6 +19,23 @@
   }
 }
 
+body::-webkit-scrollbar {
+  width: 8px;
+  background-color: var(--bg-col);
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #4b4b4b;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: #353535;
+}
+
+body::-webkit-scrollbar-thumb:active {
+  background-color: black;
+}
+
 h1,
 h2,
 h3,
