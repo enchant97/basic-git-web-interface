@@ -2,7 +2,7 @@
   --font-dark: black;
   --font-light: #f0f0f0;
   --bg-col: #c4c4c4;
-  --bg-sub-col: #afafaf;
+  --bg-sub-col: #cbcbcb;
   --bnt-col: #666666;
   --border-rad: 10px;
   --header-font: 'Roboto', sans-serif;
@@ -14,7 +14,7 @@
     --font-dark: var(--font-light);
     --font-light: #bebebe;
     --bg-col: #262626;
-    --bg-sub-col: #202020;
+    --bg-sub-col: #242424;
     --bnt-col: #3d3d3d;
   }
 }
@@ -52,7 +52,11 @@ label,
 input,
 select,
 table,
-footer {
+footer,
+ul,
+ol,
+li,
+code {
   font-size: 0.9em;
   font-family: var(--main-font);
   color: var(--font-dark);
@@ -117,6 +121,7 @@ form,
 
 table {
   text-align: left;
+  width: 100%;
 }
 
 footer {
@@ -140,6 +145,13 @@ footer {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.panel {
+  background-color: var(--bg-sub-col);
+  border: 2px solid black;
+  border-radius: var(--border-rad);
+  padding: 4px;
 }
 
 .control-bar {
@@ -168,6 +180,10 @@ footer {
 
 .tree-nav :last-child {
   margin-left: auto;
+}
+
+table.tree-objects {
+  display: table-row;
 }
 
 @media(min-width:800px) {

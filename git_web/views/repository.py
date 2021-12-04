@@ -2,12 +2,15 @@ import shutil
 
 from git_interface.branch import get_branches
 from git_interface.exceptions import (GitException, NoBranchesException,
+                                      PathDoesNotExistInRevException,
                                       UnknownRevisionException)
 from git_interface.log import get_logs
 from git_interface.ls import ls_tree
+from git_interface.show import show_file
 from git_interface.utils import (ArchiveTypes, clone_repo, get_archive,
                                  get_description, init_repo, run_maintenance,
                                  set_description)
+from markdown_it import MarkdownIt
 from quart import (Blueprint, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart_auth import login_required
@@ -141,6 +144,16 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
 
         root_tree = ls_tree(repo_path, branch, False, False)
 
+    # TODO implement more intelligent readme logic
+    readme_content = ""
+    try:
+        content = show_file(repo_path, branch, "README.md").decode()
+        md = MarkdownIt("gfm-like", {"html": False})
+        readme_content = md.render(content)
+    except PathDoesNotExistInRevException:
+        # no readme recognised
+        pass
+
     return await render_template(
         "repository/repository.html",
         repo_dir=repo_dir,
@@ -151,6 +164,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         ssh_url=ssh_url,
         repo_description=get_description(repo_path),
         root_tree=root_tree,
+        readme_content=readme_content,
     )
 
 
