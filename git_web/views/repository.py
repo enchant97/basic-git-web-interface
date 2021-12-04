@@ -146,13 +146,14 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
 
     # TODO implement more intelligent readme logic
     readme_content = ""
-    try:
-        content = show_file(repo_path, branch, "README.md").decode()
-        md = MarkdownIt("gfm-like", {"html": False})
-        readme_content = md.render(content)
-    except PathDoesNotExistInRevException:
-        # no readme recognised
-        pass
+    if head:
+        try:
+            content = show_file(repo_path, branch, "README.md").decode()
+            md = MarkdownIt("gfm-like", {"html": False})
+            readme_content = md.render(content)
+        except PathDoesNotExistInRevException:
+            # no readme recognised
+            pass
 
     return await render_template(
         "repository/repository.html",
