@@ -12,7 +12,7 @@ auth_manager = AuthManager()
 
 @app.errorhandler(Unauthorized)
 async def redirect_to_login(*_):
-    return redirect(url_for("auth.do_login"))
+    return redirect(url_for("auth.get_login"))
 
 
 def create_app() -> Quart:

@@ -23,7 +23,7 @@ blueprint = Blueprint("repository", __name__)
 @login_required
 async def get_new_repo():
     return await render_template(
-        "create-repo.html",
+        "repository/create-repo.html",
         dir_paths=find_dirs()
     )
 
