@@ -194,6 +194,19 @@ table.tree-objects {
   background-color: #005e94;
 }
 
+#login-form {
+  margin: auto;
+  display: flex;
+  gap: 10px;
+  flex-direction: column;
+  width: 50%;
+}
+
+#login-form img {
+  margin: auto;
+  max-width: 200px;
+}
+
 @media(min-width:800px) {
   .repo .aside {
     max-width: 35%;
