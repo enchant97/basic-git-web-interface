@@ -88,7 +88,7 @@ def find_dirs() -> filter:
 
 def create_ssh_uri(repo_path: Path) -> str:
     return get_config().REPOS_SSH_BASE + ":" +\
-         str(repo_path.relative_to(get_config().REPOS_PATH))
+         str(repo_path.relative_to(get_config().REPOS_PATH)).replace("\\", "/")
 
 
 def is_valid_clone_url(url: str):
