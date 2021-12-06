@@ -5,11 +5,6 @@ from git_interface.datatypes import TreeContent, TreeContentTypes
 from git_web import helpers
 
 
-@pytest.fixture()
-def app_config() -> helpers.Config:
-    return helpers.get_config()
-
-
 @pytest.mark.usefixtures("app_config")
 class TestHelpers:
     def test_is_allowed_dir(self, app_config: helpers.Config):
