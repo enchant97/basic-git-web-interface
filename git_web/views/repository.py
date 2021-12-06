@@ -16,8 +16,8 @@ from quart import (Blueprint, abort, make_response, redirect, render_template,
 from quart_auth import login_required
 
 from ..helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
-                       find_dirs, get_config, is_valid_clone_url,
-                       pathlib_delete_ro_file)
+                       find_dirs, get_config, is_commit_hash,
+                       is_valid_clone_url, pathlib_delete_ro_file)
 
 blueprint = Blueprint("repository", __name__)
 
@@ -271,7 +271,25 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
             branches = list(branches)
             branches.append(head)
 
-        logs = get_logs(repo_path, branch)
+        rev_range = branch
+        after_commit_hash = request.args.get("after")
+        if after_commit_hash:
+            if is_commit_hash(after_commit_hash):
+                # TODO use <hash>^ when git-interface has parent hash detection
+                rev_range = f"{after_commit_hash}"
+            else:
+                abort(400, "Invalid after param argument")
+
+        logs = tuple(get_logs(repo_path, rev_range, get_config().MAX_COMMIT_LOG_COUNT))
+
+        if after_commit_hash:
+            # TODO remove when <hash>^ is used
+            logs = logs[1:]
+
+        last_commit_hash = None
+        if len(logs) == get_config().MAX_COMMIT_LOG_COUNT:
+            last_commit_hash = logs[-1].commit_hash
+
         return await render_template(
             "repository/commit_log.html",
             logs=logs,
@@ -279,7 +297,8 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
             branches=branches,
             head=head,
             repo_dir=repo_dir,
-            repo_name=repo_name
+            repo_name=repo_name,
+            last_commit_hash=last_commit_hash,
         )
     except UnknownRevisionException:
         abort(404)

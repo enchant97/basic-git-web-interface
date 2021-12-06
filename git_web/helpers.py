@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
 from urllib.parse import urlparse
-
+import re
 
 @dataclass
 class Config:
@@ -18,6 +18,7 @@ class Config:
     SECRET_KEY: str
     DISALLOWED_DIRS: list[str]
     DEFAULT_BRANCH: str
+    MAX_COMMIT_LOG_COUNT: int
 
 
 @cache
@@ -36,6 +37,7 @@ def get_config() -> Config:
             SECRET_KEY=os.environ["SECRET_KEY"],
             DISALLOWED_DIRS=os.environ.get("DISALLOWED_DIRS", "").split(","),
             DEFAULT_BRANCH=os.environ.get("DEFAULT_BRANCH", "main"),
+            MAX_COMMIT_LOG_COUNT=os.environ.get("MAX_COMMIT_LOG_COUNT", 20),
         )
     except KeyError:
         print("missing required configs", file=sys.stderr)
@@ -99,3 +101,7 @@ def is_valid_clone_url(url: str):
 def pathlib_delete_ro_file(action, name, exc):
     os.chmod(name, stat.S_IWRITE)
     os.remove(name)
+
+
+def is_commit_hash(possible_hash: str) -> bool:
+    return True if re.match(r"^[a-zA-Z0-9]+$", possible_hash) else False
