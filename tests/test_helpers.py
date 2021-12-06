@@ -1,0 +1,65 @@
+import os
+
+import pytest
+from git_web import helpers
+
+DISALLOWED_DIRS = ("/my-secret-directory",)
+
+
+def setup_environ_config():
+    os.environ["REPOS_PATH"] = "pytest-testing"
+    os.environ["REPOS_SSH_BASE"] = "gitweb.lan"
+    os.environ["LOGIN_PASSWORD"] = "pytest-testing"
+    os.environ["SECRET_KEY"] = "pytest-testing"
+    os.environ["DISALLOWED_DIRS"] = ",".join(DISALLOWED_DIRS)
+
+
+@pytest.fixture()
+def app_config() -> helpers.Config:
+    setup_environ_config()
+    return helpers.get_config()
+
+
+@pytest.mark.usefixtures("app_config")
+class TestHelpers:
+    def test_is_allowed_dir(self):
+        assert helpers.is_allowed_dir(DISALLOWED_DIRS[0]) is False
+        assert helpers.is_allowed_dir("/home/git/allowed-dir") is True
+
+    def test_combine_full_dir(self, app_config: helpers.Config):
+        repo_dir = "pytest-tests"
+        expected = app_config.REPOS_PATH / repo_dir
+        actual = helpers.combine_full_dir(repo_dir)
+        assert expected == actual
+
+    def test_combine_full_dir_repo(self, app_config: helpers.Config):
+        repo_dir = "pytest-tests"
+        repo_name = "combine-test"
+        expected = app_config.REPOS_PATH / repo_dir / (repo_name + ".git")
+        actual = helpers.combine_full_dir_repo(repo_dir, repo_name)
+        assert expected == actual
+
+    def test_create_ssh_uri(self, app_config: helpers.Config):
+        repo_name = "pytest-ssh-uri-test.git"
+        repo_dir = "pytest-tests"
+        full_path = app_config.REPOS_PATH / repo_dir / repo_name
+        expected = app_config.REPOS_SSH_BASE + f":{repo_dir}/{repo_name}"
+        actual = helpers.create_ssh_uri(full_path)
+        assert expected == actual
+
+    def test_is_valid_clone_url(self):
+        assert helpers.is_valid_clone_url("https://gitweb.lan/my-dir/my-repo.git") is True
+        assert helpers.is_valid_clone_url("http://gitweb.lan/my-dir/a-repo.git") is True
+        assert helpers.is_valid_clone_url("http://gitweb.lan/a-repo.git") is True
+        assert helpers.is_valid_clone_url("ftp://gitweb.lan/my-dir/my-repo.git") is False
+        assert helpers.is_valid_clone_url("://gitweb.lan/my-dir/my-repo.git") is False
+        assert helpers.is_valid_clone_url("//my-dir/my-repo.git") is False
+        assert helpers.is_valid_clone_url("") is False
+        assert helpers.is_valid_clone_url("../my-repo/my-repo.git") is False
+
+    def test_is_commit_hash(self):
+        assert helpers.is_commit_hash("44Afff") is True
+        assert helpers.is_commit_hash("42481a7") is True
+        assert helpers.is_commit_hash("&& rm -rf .") is False
+        assert helpers.is_commit_hash("42481a7@") is False
+        assert helpers.is_commit_hash("") is False
