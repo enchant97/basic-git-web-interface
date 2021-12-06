@@ -1,11 +1,15 @@
 import os
+import re
 import stat
 import sys
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
+from typing import Iterable
 from urllib.parse import urlparse
-import re
+
+from git_interface.datatypes import TreeContent, TreeContentTypes
+
 
 @dataclass
 class Config:
@@ -84,6 +88,29 @@ def find_dirs() -> filter:
         is_allowed_dir,
         next(os.walk(get_config().REPOS_PATH))[1]
     )
+
+
+def sort_repo_tree(repo_tree: Iterable[TreeContent]) -> tuple[TreeContent]:
+    """
+    sorts a repository tree into order, folders a-z then files a-z
+
+        :param repo_tree: the repository tree
+        :return: sorted tree
+    """
+    trees = []
+    blobs = []
+
+    for obj in repo_tree:
+        if obj.type_ == TreeContentTypes.BLOB:
+            blobs.append(obj)
+        else:
+            trees.append(obj)
+
+    trees.sort(key=lambda x: x.file)
+    blobs.sort(key=lambda x: x.file)
+
+    trees.extend(blobs)
+    return tuple(trees)
 
 
 def create_ssh_uri(repo_path: Path) -> str:

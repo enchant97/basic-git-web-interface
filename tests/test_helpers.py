@@ -1,5 +1,9 @@
+from pathlib import Path
+
 import pytest
+from git_interface.datatypes import TreeContent, TreeContentTypes
 from git_web import helpers
+
 
 @pytest.fixture()
 def app_config() -> helpers.Config:
@@ -24,6 +28,29 @@ class TestHelpers:
         expected = app_config.REPOS_PATH / repo_dir / (repo_name + ".git")
         actual = helpers.combine_full_dir_repo(repo_dir, repo_name)
         assert expected == actual
+
+    def test_sort_repo_tree(self):
+        unsorted_content = (
+            TreeContent("", TreeContentTypes.TREE, "", Path("my-folder"), ""),
+            TreeContent("", TreeContentTypes.BLOB, "", Path("a-file.txt"), ""),
+            TreeContent("", TreeContentTypes.BLOB, "", Path("something"), ""),
+            TreeContent("", TreeContentTypes.TREE, "", Path("hi-secrets"), ""),
+            TreeContent("", TreeContentTypes.BLOB, "", Path("hello.py"), ""),
+            TreeContent("", TreeContentTypes.TREE, "", Path("hello"), ""),
+        )
+        expected_order = (
+            TreeContent("", TreeContentTypes.TREE, "", Path("hello"), ""),
+            TreeContent("", TreeContentTypes.TREE, "", Path("hi-secrets"), ""),
+            TreeContent("", TreeContentTypes.TREE, "", Path("my-folder"), ""),
+            TreeContent("", TreeContentTypes.BLOB, "", Path("a-file.txt"), ""),
+            TreeContent("", TreeContentTypes.BLOB, "", Path("hello.py"), ""),
+            TreeContent("", TreeContentTypes.BLOB, "", Path("something"), ""),
+        )
+
+        actual_order = helpers.sort_repo_tree(unsorted_content)
+
+        assert len(actual_order) == len(expected_order)
+        assert expected_order == actual_order
 
     def test_create_ssh_uri(self, app_config: helpers.Config):
         repo_name = "pytest-ssh-uri-test.git"

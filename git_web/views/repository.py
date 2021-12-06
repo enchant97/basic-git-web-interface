@@ -17,7 +17,8 @@ from quart_auth import login_required
 
 from ..helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
                        find_dirs, get_config, is_commit_hash,
-                       is_valid_clone_url, pathlib_delete_ro_file)
+                       is_valid_clone_url, pathlib_delete_ro_file,
+                       sort_repo_tree)
 
 blueprint = Blueprint("repository", __name__)
 
@@ -144,6 +145,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         branches.append(head)
 
         root_tree = ls_tree(repo_path, branch, False, False)
+        root_tree = sort_repo_tree(root_tree)
 
         recent_log = next(get_logs(repo_path, branch))
 
