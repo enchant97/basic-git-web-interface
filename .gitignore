@@ -8,3 +8,5 @@ data/
 
 __pycache__
 .venv/
+.coverage
+.pytest_cache

@@ -1,29 +1,15 @@
-import os
-
 import pytest
 from git_web import helpers
 
-DISALLOWED_DIRS = ("/my-secret-directory",)
-
-
-def setup_environ_config():
-    os.environ["REPOS_PATH"] = "pytest-testing"
-    os.environ["REPOS_SSH_BASE"] = "gitweb.lan"
-    os.environ["LOGIN_PASSWORD"] = "pytest-testing"
-    os.environ["SECRET_KEY"] = "pytest-testing"
-    os.environ["DISALLOWED_DIRS"] = ",".join(DISALLOWED_DIRS)
-
-
 @pytest.fixture()
 def app_config() -> helpers.Config:
-    setup_environ_config()
     return helpers.get_config()
 
 
 @pytest.mark.usefixtures("app_config")
 class TestHelpers:
-    def test_is_allowed_dir(self):
-        assert helpers.is_allowed_dir(DISALLOWED_DIRS[0]) is False
+    def test_is_allowed_dir(self, app_config: helpers.Config):
+        assert helpers.is_allowed_dir(app_config.DISALLOWED_DIRS[0]) is False
         assert helpers.is_allowed_dir("/home/git/allowed-dir") is True
 
     def test_combine_full_dir(self, app_config: helpers.Config):
