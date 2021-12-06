@@ -1,5 +1,6 @@
 pytest
 pytest-env
 pytest-cov
+pytest-html
 flake8
 radon

@@ -13,7 +13,7 @@ pip_requirements:
 	python -m pip install -r requirements-dev.txt
 
 pytest_test:
-	pytest --cov=git_web tests/
+	pytest --html=reports/report.html --self-contained-html --cov=git_web tests/
 
 linting_test:
 	flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
