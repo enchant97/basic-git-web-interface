@@ -26,7 +26,7 @@ class Config:
 
 
 @cache
-def get_config() -> Config:
+def get_config() -> Config:  # pragma: no cover
     """
     get the app config from environment variables.
     will exit(1) if error occurs
@@ -125,7 +125,7 @@ def is_valid_clone_url(url: str):
     return True
 
 
-def pathlib_delete_ro_file(action, name, exc):
+def pathlib_delete_ro_file(action, name, exc):  # pragma: no cover
     os.chmod(name, stat.S_IWRITE)
     os.remove(name)
 
