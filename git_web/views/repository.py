@@ -15,10 +15,11 @@ from quart import (Blueprint, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart_auth import login_required
 
-from ..helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
-                       find_dirs, get_config, is_commit_hash,
-                       is_valid_clone_url, is_valid_repo_name,
-                       pathlib_delete_ro_file, sort_repo_tree)
+from ..helpers import (create_ssh_uri, find_dirs, get_config, is_commit_hash,
+                       is_valid_clone_url, is_valid_directory_name,
+                       is_valid_repo_name, pathlib_delete_ro_file,
+                       safe_combine_full_dir, safe_combine_full_dir_repo,
+                       sort_repo_tree)
 
 blueprint = Blueprint("repository", __name__)
 
@@ -51,9 +52,10 @@ async def post_new_repo():
             abort(400, "repo name/directory cannot be blank")
         if not is_valid_repo_name(name):
             abort(400, "repo name contains restricted characters")
+        if not is_valid_directory_name(directory):
+            abort(400, "directory name contains restricted characters")
 
-        full_path = combine_full_dir(directory)
-        name = name.strip().replace(" ", "-")
+        full_path = safe_combine_full_dir(directory)
         full_repo_path = full_path / (name + ".git")
 
         if not full_path.exists():
@@ -99,8 +101,10 @@ async def post_import_repo():
             abort(400, "repo name/directory cannot be blank")
         if not is_valid_repo_name(name):
             abort(400, "repo name contains restricted characters")
+        if not is_valid_directory_name(directory):
+            abort(400, "directory name contains restricted characters")
 
-        full_path = combine_full_dir(directory)
+        full_path = safe_combine_full_dir(directory)
         full_repo_path = full_path / (name + ".git")
 
         if not full_path.exists():
@@ -126,7 +130,7 @@ async def post_import_repo():
 @blueprint.route("/<repo_dir>/<repo_name>/tree/<branch>")
 @login_required
 async def repo_view(repo_dir: str, repo_name: str, branch: str):
-    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
@@ -185,7 +189,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
 @blueprint.get("/<repo_dir>/<repo_name>/settings")
 @login_required
 async def repo_settings(repo_dir: str, repo_name: str):
-    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
@@ -206,7 +210,7 @@ async def repo_settings(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/delete", methods=["GET"])
 @login_required
 async def repo_delete(repo_dir: str, repo_name: str):
-    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
     shutil.rmtree(repo_path, onerror=pathlib_delete_ro_file)
@@ -216,7 +220,7 @@ async def repo_delete(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/set-description", methods=["POST"])
 @login_required
 async def repo_set_description(repo_dir: str, repo_name: str):
-    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
@@ -233,7 +237,7 @@ async def repo_set_description(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/set-name", methods=["POST"])
 @login_required
 async def repo_set_name(repo_dir: str, repo_name: str):
-    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 
@@ -245,7 +249,7 @@ async def repo_set_name(repo_dir: str, repo_name: str):
     if not is_valid_repo_name(new_name):
         abort(400, "repo name contains restricted characters")
 
-    repo_path.rename(combine_full_dir_repo(repo_dir, new_name))
+    repo_path.rename(safe_combine_full_dir_repo(repo_dir, new_name))
 
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
 
@@ -253,7 +257,7 @@ async def repo_set_name(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/maintenance")
 @login_required
 async def repo_maintenance_run(repo_dir: str, repo_name: str):
-    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
     run_maintenance(repo_path)
@@ -264,7 +268,7 @@ async def repo_maintenance_run(repo_dir: str, repo_name: str):
 @login_required
 async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
     try:
-        repo_path = combine_full_dir_repo(repo_dir, repo_name)
+        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
             abort(404)
 
@@ -326,7 +330,7 @@ async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     except ValueError:
         abort(404)
 
-    repo_path = combine_full_dir_repo(repo_dir, repo_name)
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
 

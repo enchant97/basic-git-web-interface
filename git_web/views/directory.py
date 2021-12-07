@@ -1,7 +1,8 @@
 from quart import Blueprint, abort, redirect, render_template, request, url_for
 from quart_auth import login_required
 
-from ..helpers import combine_full_dir, find_dirs, find_repos
+from ..helpers import (find_dirs, find_repos, is_valid_directory_name,
+                       safe_combine_full_dir)
 
 blueprint = Blueprint("directory", __name__)
 
@@ -27,9 +28,12 @@ async def post_new_dir():
     repo_dir = (await request.form).get("name")
 
     if not repo_dir:
-        abort(400)
+        abort(400, "directory name missing")
     repo_dir = repo_dir.strip().replace(" ", "-")
-    full_path = combine_full_dir(repo_dir)
+    if not is_valid_directory_name(repo_dir):
+        abort(400, "directory name contains restricted characters")
+
+    full_path = safe_combine_full_dir(repo_dir)
 
     if full_path.exists():
         abort(400, "already exists")
@@ -42,7 +46,7 @@ async def post_new_dir():
 @blueprint.get("/<directory>/delete")
 @login_required
 async def get_dir_delete(directory: str):
-    full_path = combine_full_dir(directory)
+    full_path = safe_combine_full_dir(directory)
     if not full_path.exists():
         abort(400, "directory does not exist")
     try:
@@ -57,7 +61,7 @@ async def get_dir_delete(directory: str):
 @blueprint.route("/<directory>")
 @login_required
 async def repo_list(directory):
-    repo_paths = sorted(find_repos(combine_full_dir(directory), True))
+    repo_paths = sorted(find_repos(safe_combine_full_dir(directory), True))
     return await render_template(
         "directory/repos.html",
         directory=directory,

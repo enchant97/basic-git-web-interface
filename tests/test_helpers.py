@@ -77,8 +77,35 @@ class TestHelpers:
         assert helpers.is_valid_repo_name("valid") is True
         assert helpers.is_valid_repo_name("valid_underscore") is True
         assert helpers.is_valid_repo_name("valid-1234") is True
+        assert helpers.is_valid_repo_name("a"*100) is True
+        assert helpers.is_valid_repo_name("a"*20) is True
         assert helpers.is_valid_repo_name("with a space") is False
         assert helpers.is_valid_repo_name("symbols-$$.") is False
         assert helpers.is_valid_repo_name("") is False
         assert helpers.is_valid_repo_name("()") is False
         assert helpers.is_valid_repo_name("../breakout/repo-name") is False
+        assert helpers.is_valid_repo_name("a"*200) is False
+
+    def test_is_valid_directory_name(self):
+        assert helpers.is_valid_directory_name("my-directory") is True
+        assert helpers.is_valid_directory_name("valid") is True
+        assert helpers.is_valid_directory_name("valid_underscore") is True
+        assert helpers.is_valid_directory_name("valid-1234") is True
+        assert helpers.is_valid_repo_name("a"*100) is True
+        assert helpers.is_valid_repo_name("a"*20) is True
+        assert helpers.is_valid_directory_name("with a space") is False
+        assert helpers.is_valid_directory_name("symbols-$$.") is False
+        assert helpers.is_valid_directory_name("") is False
+        assert helpers.is_valid_directory_name("()") is False
+        assert helpers.is_valid_directory_name("../breakout/directory-name") is False
+        assert helpers.is_valid_repo_name("a"*200) is False
+
+    def test_safe_combine_full_dir(self):
+        with pytest.raises(ValueError):
+            helpers.safe_combine_full_dir("not safe!@:;")
+
+    def test_safe_combine_full_dir_repo(self):
+        with pytest.raises(ValueError):
+            helpers.safe_combine_full_dir_repo("not safe!@:;", "safe")
+        with pytest.raises(ValueError):
+            helpers.safe_combine_full_dir_repo("safe", "not safe!@:*(33;")

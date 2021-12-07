@@ -80,7 +80,7 @@ def combine_full_dir(repo_dir: str) -> Path:
 
 
 def combine_full_dir_repo(repo_dir: str, repo_name: str) -> Path:
-    return get_config().REPOS_PATH / repo_dir / (repo_name + ".git")
+    return combine_full_dir(repo_dir) / (repo_name + ".git")
 
 
 def find_dirs() -> filter:
@@ -141,4 +141,46 @@ def is_valid_repo_name(name: str) -> bool:
         :param name: the name to check
         :return: whether given name is valid
     """
-    return True if re.match(r"^[a-zA-Z0-9-_]+$", name) else False
+    return True if re.match(r"^[a-zA-Z0-9-_]+$", name) and len(name) <= 100 else False
+
+
+def is_valid_directory_name(name: str) -> bool:
+    """
+    Checks whether given name can be a valid directory name
+
+        :param name: the name to check
+        :return: whether given name is valid
+    """
+    return is_valid_repo_name(name)
+
+
+def safe_combine_full_dir(repo_dir: str) -> Path:
+    """
+    Create fullpath from a directory name,
+    will make sure given data is valid
+
+        :param repo_dir: A repository directory
+        :raises ValueError: If directory name is invalid
+        :return: The combined path
+    """
+    if not is_valid_directory_name(repo_dir):
+        raise ValueError("'repo_dir' not valid")
+    return combine_full_dir(repo_dir)
+
+
+def safe_combine_full_dir_repo(repo_dir: str, repo_name: str) -> Path:
+    """
+    Combine a directory name and a repository name together,
+    will make sure given data is valid
+
+        :param repo_dir: A repository directory
+        :param repo_name: A repository name, exlcuding any file extensions
+        :raises ValueError: If directory name is invalid
+        :raises ValueError: If repo name is invalid
+        :return: The combined path
+    """
+    if not is_valid_directory_name(repo_dir):
+        raise ValueError("'repo_dir' not valid")
+    if not is_valid_repo_name(repo_name):
+        raise ValueError("'repo_name' not valid")
+    return combine_full_dir_repo(repo_dir, repo_name)
