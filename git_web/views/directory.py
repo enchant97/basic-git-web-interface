@@ -11,7 +11,7 @@ blueprint = Blueprint("directory", __name__)
 async def directory_list():
     return await render_template(
         "directory/directories.html",
-        dir_paths=find_dirs()
+        dir_paths=sorted(find_dirs())
     )
 
 
@@ -57,7 +57,7 @@ async def get_dir_delete(directory: str):
 @blueprint.route("/<directory>")
 @login_required
 async def repo_list(directory):
-    repo_paths = find_repos(combine_full_dir(directory), True)
+    repo_paths = sorted(find_repos(combine_full_dir(directory), True))
     return await render_template(
         "directory/repos.html",
         directory=directory,

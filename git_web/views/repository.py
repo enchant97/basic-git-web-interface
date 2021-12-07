@@ -203,7 +203,7 @@ async def repo_delete(repo_dir: str, repo_name: str):
     if not repo_path.exists():
         abort(404)
     shutil.rmtree(repo_path, onerror=pathlib_delete_ro_file)
-    return redirect(url_for(".repo_list", directory=repo_dir))
+    return redirect(url_for("directory.repo_list", directory=repo_dir))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/set-description", methods=["POST"])
