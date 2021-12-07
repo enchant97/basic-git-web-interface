@@ -202,6 +202,10 @@ table.tree-objects {
   width: 50%;
 }
 
+#rendered-text pre {
+  overflow: auto;
+}
+
 #login-form img {
   margin: auto;
   max-width: 200px;
@@ -213,7 +217,7 @@ table.tree-objects {
   }
 }
 
-@media(max-width:610px) {
+@media(max-width:780px) {
   .repo {
     flex-direction: column;
   }
