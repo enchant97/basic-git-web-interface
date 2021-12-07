@@ -17,8 +17,8 @@ from quart_auth import login_required
 
 from ..helpers import (combine_full_dir, combine_full_dir_repo, create_ssh_uri,
                        find_dirs, get_config, is_commit_hash,
-                       is_valid_clone_url, pathlib_delete_ro_file,
-                       sort_repo_tree)
+                       is_valid_clone_url, is_valid_repo_name,
+                       pathlib_delete_ro_file, sort_repo_tree)
 
 blueprint = Blueprint("repository", __name__)
 
@@ -43,9 +43,14 @@ async def post_new_repo():
 
         if description == "":
             description = None
+        else:
+            description = description.strip()
 
-        if name == "" or directory == "":
+        name = name.strip().replace(" ", "-")
+        if name == "":
             abort(400, "repo name/directory cannot be blank")
+        if not is_valid_repo_name(name):
+            abort(400, "repo name contains restricted characters")
 
         full_path = combine_full_dir(directory)
         name = name.strip().replace(" ", "-")
@@ -89,11 +94,13 @@ async def post_import_repo():
         name = form["name"]
         directory = form["directory"]
 
+        name = name.strip().replace(" ", "-")
         if name == "" or directory == "":
             abort(400, "repo name/directory cannot be blank")
+        if not is_valid_repo_name(name):
+            abort(400, "repo name contains restricted characters")
 
         full_path = combine_full_dir(directory)
-        name = name.strip().replace(" ", "-")
         full_repo_path = full_path / (name + ".git")
 
         if not full_path.exists():
@@ -215,8 +222,9 @@ async def repo_set_description(repo_dir: str, repo_name: str):
 
     new_description = (await request.form).get("repo-description")
     if not new_description:
-        abort(400)
+        abort(400, "no 'repo-description' given")
 
+    new_description = new_description.strip()
     set_description(repo_path, new_description)
 
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
@@ -230,9 +238,13 @@ async def repo_set_name(repo_dir: str, repo_name: str):
         abort(404)
 
     new_name = (await request.form).get("repo-name")
+
     if not new_name:
-        abort(400)
+        abort(400, "missing 'repo-name'")
     new_name = new_name.strip().replace(" ", "-")
+    if not is_valid_repo_name(new_name):
+        abort(400, "repo name contains restricted characters")
+
     repo_path.rename(combine_full_dir_repo(repo_dir, new_name))
 
     return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))

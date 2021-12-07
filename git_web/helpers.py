@@ -132,3 +132,13 @@ def pathlib_delete_ro_file(action, name, exc):  # pragma: no cover
 
 def is_commit_hash(possible_hash: str) -> bool:
     return True if re.match(r"^[a-zA-Z0-9]+$", possible_hash) else False
+
+
+def is_valid_repo_name(name: str) -> bool:
+    """
+    Checks whether given name can be a valid repository name
+
+        :param name: the name to check
+        :return: whether given name is valid
+    """
+    return True if re.match(r"^[a-zA-Z0-9-_]+$", name) else False

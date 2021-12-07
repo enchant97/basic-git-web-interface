@@ -71,3 +71,14 @@ class TestHelpers:
         assert helpers.is_commit_hash("&& rm -rf .") is False
         assert helpers.is_commit_hash("42481a7@") is False
         assert helpers.is_commit_hash("") is False
+
+    def test_is_valid_repo_name(self):
+        assert helpers.is_valid_repo_name("my-repo") is True
+        assert helpers.is_valid_repo_name("valid") is True
+        assert helpers.is_valid_repo_name("valid_underscore") is True
+        assert helpers.is_valid_repo_name("valid-1234") is True
+        assert helpers.is_valid_repo_name("with a space") is False
+        assert helpers.is_valid_repo_name("symbols-$$.") is False
+        assert helpers.is_valid_repo_name("") is False
+        assert helpers.is_valid_repo_name("()") is False
+        assert helpers.is_valid_repo_name("../breakout/repo-name") is False
