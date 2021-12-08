@@ -309,7 +309,8 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
             else:
                 abort(400, "Invalid after param argument")
 
-        logs = tuple(get_logs(repo_path, rev_range, get_config().MAX_COMMIT_LOG_COUNT))
+        logs = tuple(get_logs(repo_path, rev_range,
+                     get_config().MAX_COMMIT_LOG_COUNT))
 
         if after_commit_hash:
             # TODO remove when <hash>^ is used

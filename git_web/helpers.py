@@ -115,7 +115,7 @@ def sort_repo_tree(repo_tree: Iterable[TreeContent]) -> tuple[TreeContent]:
 
 def create_ssh_uri(repo_path: Path) -> str:
     return get_config().REPOS_SSH_BASE + ":" +\
-         str(repo_path.relative_to(get_config().REPOS_PATH)).replace("\\", "/")
+        str(repo_path.relative_to(get_config().REPOS_PATH)).replace("\\", "/")
 
 
 def is_valid_clone_url(url: str):

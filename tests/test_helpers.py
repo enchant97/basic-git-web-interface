@@ -100,11 +100,24 @@ class TestHelpers:
         assert helpers.is_valid_directory_name("../breakout/directory-name") is False
         assert helpers.is_valid_repo_name("a"*200) is False
 
-    def test_safe_combine_full_dir(self):
+    def test_safe_combine_full_dir(self, app_config: helpers.Config):
+        repo_dir = "pytest-tests"
+        expected = app_config.REPOS_PATH / repo_dir
+        actual = helpers.safe_combine_full_dir(repo_dir)
+        assert expected == actual
+
+    def test_safe_combine_full_dir_invalid(self):
         with pytest.raises(ValueError):
             helpers.safe_combine_full_dir("not safe!@:;")
 
-    def test_safe_combine_full_dir_repo(self):
+    def test_safe_combine_full_dir_repo(self, app_config: helpers.Config):
+        repo_dir = "pytest-tests"
+        repo_name = "combine-test"
+        expected = app_config.REPOS_PATH / repo_dir / (repo_name + ".git")
+        actual = helpers.safe_combine_full_dir_repo(repo_dir, repo_name)
+        assert expected == actual
+
+    def test_safe_combine_full_dir_repo_invalid(self):
         with pytest.raises(ValueError):
             helpers.safe_combine_full_dir_repo("not safe!@:;", "safe")
         with pytest.raises(ValueError):

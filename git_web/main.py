@@ -13,7 +13,7 @@ auth_manager = AuthManager()
 
 
 @app.errorhandler(Unauthorized)
-async def redirect_to_login(*_):
+async def redirect_to_login(*_):  # pragma: no cover
     return redirect(url_for("auth.get_login"))
 
 
@@ -36,6 +36,9 @@ def create_app() -> Quart:
     try:
         config.REPOS_PATH.mkdir(parents=True, exist_ok=True)
     except PermissionError:
-        print(f"Not enough permissions for repos path '{config.REPOS_PATH}'", file=sys.stderr)
+        print(
+            f"Not enough permissions for repos path '{config.REPOS_PATH}'",
+            file=sys.stderr
+        )
         sys.exit(1)
     return app
