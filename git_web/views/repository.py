@@ -17,10 +17,10 @@ from quart.helpers import flash
 from quart_auth import login_required
 
 from ..helpers import (create_ssh_uri, find_dirs, get_config, is_commit_hash,
-                       is_valid_clone_url, is_valid_directory_name,
-                       is_valid_repo_name, pathlib_delete_ro_file,
-                       safe_combine_full_dir, safe_combine_full_dir_repo,
-                       sort_repo_tree)
+                       is_name_reserved, is_valid_clone_url,
+                       is_valid_directory_name, is_valid_repo_name,
+                       pathlib_delete_ro_file, safe_combine_full_dir,
+                       safe_combine_full_dir_repo, sort_repo_tree)
 
 blueprint = Blueprint("repository", __name__)
 
@@ -58,6 +58,9 @@ async def post_new_repo():
         if not is_valid_directory_name(directory):
             await flash("Directory name contains restricted characters", "error")
             return redirect(url_for(".get_new_repo"))
+        if is_name_reserved(name):
+            await flash("Repo name is reserved", "error")
+            return redirect(url_for(".get_new_repo"))
 
         full_path = safe_combine_full_dir(directory)
         full_repo_path = full_path / (name + ".git")
@@ -84,7 +87,7 @@ async def post_new_repo():
     return redirect(url_for(".repo_view", repo_dir=directory, repo_name=name))
 
 
-@blueprint.get("/new/import")
+@blueprint.get("/import")
 @login_required
 async def get_import_repo():
     return await render_template(
@@ -93,7 +96,7 @@ async def get_import_repo():
     )
 
 
-@blueprint.post("/new/import")
+@blueprint.post("/import")
 @login_required
 async def post_import_repo():
     try:
@@ -111,6 +114,9 @@ async def post_import_repo():
             return redirect(url_for(".get_import_repo"))
         if not is_valid_directory_name(directory):
             await flash("Directory name contains restricted characters", "error")
+            return redirect(url_for(".get_import_repo"))
+        if is_name_reserved(name):
+            await flash("Repo name is reserved", "error")
             return redirect(url_for(".get_import_repo"))
 
         full_path = safe_combine_full_dir(directory)
@@ -258,7 +264,11 @@ async def repo_set_name(repo_dir: str, repo_name: str):
         abort(400, "missing 'repo-name'")
     new_name = new_name.strip().replace(" ", "-")
     if not is_valid_repo_name(new_name):
-        abort(400, "repo name contains restricted characters")
+        await flash("Repo name contains restricted characters", "error")
+        return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
+    if is_name_reserved(new_name):
+        await flash("Repo name is reserved", "error")
+        return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
 
     repo_path.rename(safe_combine_full_dir_repo(repo_dir, new_name))
 

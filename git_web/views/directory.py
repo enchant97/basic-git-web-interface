@@ -2,7 +2,7 @@ from quart import Blueprint, abort, redirect, render_template, request, url_for
 from quart.helpers import flash
 from quart_auth import login_required
 
-from ..helpers import (find_repos, is_valid_directory_name,
+from ..helpers import (find_repos, is_name_reserved, is_valid_directory_name,
                        safe_combine_full_dir)
 
 blueprint = Blueprint("directory", __name__)
@@ -24,6 +24,9 @@ async def post_new_dir():
     repo_dir = repo_dir.strip().replace(" ", "-")
     if not is_valid_directory_name(repo_dir):
         await flash("Directory name contains restricted characters", "error")
+        return redirect(url_for(".get_new_dir"))
+    if is_name_reserved(repo_dir):
+        await flash("Repo directory is reserved", "error")
         return redirect(url_for(".get_new_dir"))
 
     full_path = safe_combine_full_dir(repo_dir)

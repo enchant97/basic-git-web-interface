@@ -10,6 +10,15 @@ from urllib.parse import urlparse
 
 from git_interface.datatypes import TreeContent, TreeContentTypes
 
+RESERVED_NAMES = (
+    "auth",
+    "login",
+    "logout",
+    "new",
+    "new-dir",
+    "import",
+)
+
 
 @dataclass
 class Config:
@@ -184,3 +193,14 @@ def safe_combine_full_dir_repo(repo_dir: str, repo_name: str) -> Path:
     if not is_valid_repo_name(repo_name):
         raise ValueError("'repo_name' not valid")
     return combine_full_dir_repo(repo_dir, repo_name)
+
+
+def is_name_reserved(name: str) -> bool:
+    """
+    Check whether the name is reserved,
+    for use with repo name or repo directory
+
+        :param name: name to test
+        :return: whether name is reserved
+    """
+    return name in RESERVED_NAMES

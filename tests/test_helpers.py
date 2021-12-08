@@ -122,3 +122,8 @@ class TestHelpers:
             helpers.safe_combine_full_dir_repo("not safe!@:;", "safe")
         with pytest.raises(ValueError):
             helpers.safe_combine_full_dir_repo("safe", "not safe!@:*(33;")
+
+    def test_is_name_reserved(self):
+        assert helpers.is_name_reserved("login") is True
+        assert helpers.is_name_reserved("logout") is True
+        assert helpers.is_name_reserved("random") is False
