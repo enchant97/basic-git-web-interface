@@ -4,7 +4,7 @@ from web_health_checker.contrib import quart as health_check
 
 from . import __version__
 from .helpers import get_config
-from .views import auth, directory, repository
+from .views import auth, directory, home, repository
 
 app = Quart(__name__)
 auth_manager = AuthManager()
@@ -24,6 +24,7 @@ def create_app() -> Quart:
     app.config["VERSION"] = __version__
     # register blueprints
     app.register_blueprint(health_check.blueprint)
+    app.register_blueprint(home.blueprint)
     app.register_blueprint(auth.blueprint, url_prefix="/auth")
     app.register_blueprint(directory.blueprint)
     app.register_blueprint(repository.blueprint)

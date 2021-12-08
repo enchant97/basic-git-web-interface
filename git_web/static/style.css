@@ -91,6 +91,11 @@ header nav {
   gap: 15px;
 }
 
+header nav a {
+  display: flex;
+  align-items: center;
+}
+
 header nav :nth-child(2) {
   margin-left: auto;
 }
@@ -204,6 +209,21 @@ table.tree-objects {
 
 #rendered-text pre {
   overflow: auto;
+}
+
+#welcome-panel img {
+  max-width: 25%;
+  margin: auto;
+}
+
+#welcome-panel h1 {
+  font-size: 3em;
+  text-align: center;
+}
+
+#welcome-panel h2 {
+  font-size: 1.5em;
+  text-align: center;
 }
 
 #login-form img {

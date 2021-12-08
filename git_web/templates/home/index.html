@@ -1,0 +1,34 @@
+{% extends "/shared/base.html" %}
+{% block title %}Home{% endblock %}
+{% block main %}
+{% if current_user.is_authenticated %}
+<section class="sub down">
+    <h2>Directories</h2>
+    {% for path in dir_paths %}
+    <a href="{{ url_for('directory.repo_list', directory=path) }}" class="bnt">{{ path }}</a>
+    {% endfor %}
+</section>
+{% else %}
+<section id="welcome-panel" class="sub down">
+    <img src="{{ url_for('static', filename='icon-256.png') }}" alt="app icon">
+    <h1>Basic Git Web Interface</h1>
+    <h2>A fast and minimal git web interface.</h2>
+</section>
+
+<section class="sub down">
+    <h2>Features</h2>
+    <ul>
+        <li>Fast on lower end devices, like a Raspberry Pi</li>
+        <li>Cross-Platform, built with Python 3</li>
+        <li>Containerized, built Docker image</li>
+        <li>Stunning look, with site theme picker</li>
+        <li>Open Source, get the code from: <a
+                href="https://github.com/enchant97/basic-git-web-interface">github.com/enchant97/basic-git-web-interface</a>
+        </li>
+    </ul>
+</section>
+
+<p class="sub">To use this service please <a href="{{ url_for('auth.get_login') }}">login</a>.</p>
+{% endif %}
+
+{% endblock %}

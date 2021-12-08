@@ -1,19 +1,10 @@
 from quart import Blueprint, abort, redirect, render_template, request, url_for
 from quart_auth import login_required
 
-from ..helpers import (find_dirs, find_repos, is_valid_directory_name,
+from ..helpers import (find_repos, is_valid_directory_name,
                        safe_combine_full_dir)
 
 blueprint = Blueprint("directory", __name__)
-
-
-@blueprint.route("/")
-@login_required
-async def directory_list():
-    return await render_template(
-        "directory/directories.html",
-        dir_paths=sorted(find_dirs())
-    )
 
 
 @blueprint.get("/new-dir")
@@ -55,7 +46,7 @@ async def get_dir_delete(directory: str):
         full_path.rmdir()
     else:
         abort(400, "directory not empty")
-    return redirect(url_for(".directory_list"))
+    return redirect(url_for("home.index"))
 
 
 @blueprint.route("/<directory>")

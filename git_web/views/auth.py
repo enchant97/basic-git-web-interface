@@ -21,7 +21,7 @@ async def post_login():
     if not secrets.compare_digest(password, get_config().LOGIN_PASSWORD):
         abort(401)
     login_user(AuthUser("user"), True)
-    return redirect(url_for("directory.directory_list"))
+    return redirect(url_for("home.index"))
 
 
 @blueprint.route("/logout")
