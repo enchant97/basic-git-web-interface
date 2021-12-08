@@ -1,6 +1,6 @@
 import secrets
 
-from quart import Blueprint, abort, redirect, render_template, request, url_for
+from quart import Blueprint, abort, redirect, render_template, request, url_for, flash
 from quart_auth import AuthUser, login_required, login_user, logout_user
 
 from ..helpers import get_config
@@ -19,7 +19,8 @@ async def post_login():
     if not password:
         abort(400)
     if not secrets.compare_digest(password, get_config().LOGIN_PASSWORD):
-        abort(401)
+        await flash("Incorrect Password", "error")
+        return redirect(url_for(".get_login"))
     login_user(AuthUser("user"), True)
     return redirect(url_for("home.index"))
 
@@ -28,4 +29,5 @@ async def post_login():
 @login_required
 async def do_logout():
     logout_user()
+    await flash("Successfully Logged Out", "ok")
     return redirect(url_for(".get_login"))

@@ -36,6 +36,7 @@
         <h1>{% block header_one %}{{ self.title() }}{% endblock %}</h1>
         <h2>{% block header_two %}{{ self.title2() }}{% endblock %}</h2>
         <h3>{% block header_three %}{% endblock %}</h3>
+        {% include "/shared/flashed-messages.html" %}
     </header>
     <main>{% block main %}{% endblock %}</main>
     <footer>Running Basic Git Web Interface V{{ config.VERSION }}, provided by <strong><a

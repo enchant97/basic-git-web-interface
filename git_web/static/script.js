@@ -4,6 +4,7 @@ function select_navigate_to(element) {
     document.location.assign(element.value);
 }
 
+// Setup site theme
 ThemeChanger.theme_meta.light[1] = [
     ["--font-dark", "black"],
     ["--font-light", "#f0f0f0"],
@@ -25,3 +26,8 @@ document.getElementById("themeToggleBnt").addEventListener("click", _ => {
 });
 
 ThemeChanger.on_load();
+
+// Setup removing expired "flashes"
+document.querySelectorAll("[data-dismiss='flash']").forEach(element => {
+    setTimeout(() => { element.remove() }, 4000);
+});
