@@ -1,5 +1,5 @@
-# Basic Git Web Server
-This project (bgws) is designed to be basic. For example there is only one user account that has access to everything. It also doesn't have features like pull requests, issues, etc.
+# Basic Git Web Interface
+This project (bgwi) is designed to be basic. For example there is only one user account that has access to everything. It also doesn't have features like pull requests, issues, etc.
 
 It has been designed to run through docker and it is recommended to run through a proxy like Nginx.
 

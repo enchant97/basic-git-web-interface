@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
-    <title>{% block title2 %}{% endblock %} {% block title %}{% endblock %} | Basic Git Web Server</title>
+    <title>{% block title2 %}{% endblock %} {% block title %}{% endblock %} | Basic Git Web Interface</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap" rel="stylesheet">
@@ -35,7 +35,7 @@
         <h3>{% block header_three %}{% endblock %}</h3>
     </header>
     <main>{% block main %}{% endblock %}</main>
-    <footer>Running Basic Git Web Server V{{ config.VERSION }}, provided by <strong><a
+    <footer>Running Basic Git Web Interface V{{ config.VERSION }}, provided by <strong><a
                 href="https://github.com/enchant97">enchant97</a></strong></footer>
 </body>
 
