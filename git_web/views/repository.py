@@ -13,6 +13,7 @@ from git_interface.utils import (ArchiveTypes, clone_repo, get_archive,
 from markdown_it import MarkdownIt
 from quart import (Blueprint, abort, make_response, redirect, render_template,
                    request, url_for)
+from quart.helpers import flash
 from quart_auth import login_required
 
 from ..helpers import (create_ssh_uri, find_dirs, get_config, is_commit_hash,
@@ -49,19 +50,24 @@ async def post_new_repo():
 
         name = name.strip().replace(" ", "-")
         if name == "":
-            abort(400, "repo name/directory cannot be blank")
+            await flash("Repo name/directory cannot be blank", "error")
+            return redirect(url_for(".get_new_repo"))
         if not is_valid_repo_name(name):
-            abort(400, "repo name contains restricted characters")
+            await flash("Repo name contains restricted characters", "error")
+            return redirect(url_for(".get_new_repo"))
         if not is_valid_directory_name(directory):
-            abort(400, "directory name contains restricted characters")
+            await flash("Directory name contains restricted characters", "error")
+            return redirect(url_for(".get_new_repo"))
 
         full_path = safe_combine_full_dir(directory)
         full_repo_path = full_path / (name + ".git")
 
         if not full_path.exists():
-            abort(400, "directory does not exist")
+            await flash("Directory does not exist", "error")
+            return redirect(url_for(".get_new_repo"))
         if full_repo_path.exists():
-            abort(400, "repo name already exists")
+            await flash("Repo name already exists", "error")
+            return redirect(url_for(".get_new_repo"))
     except KeyError:
         abort(400, "missing required values")
     except ValueError:
@@ -98,22 +104,27 @@ async def post_import_repo():
 
         name = name.strip().replace(" ", "-")
         if name == "" or directory == "":
-            abort(400, "repo name/directory cannot be blank")
+            await flash("Repo name/directory cannot be blank", "error")
+            return redirect(url_for(".get_import_repo"))
         if not is_valid_repo_name(name):
-            abort(400, "repo name contains restricted characters")
+            await flash("Repo name contains restricted characters", "error")
+            return redirect(url_for(".get_import_repo"))
         if not is_valid_directory_name(directory):
-            abort(400, "directory name contains restricted characters")
+            await flash("Directory name contains restricted characters", "error")
+            return redirect(url_for(".get_import_repo"))
 
         full_path = safe_combine_full_dir(directory)
         full_repo_path = full_path / (name + ".git")
 
         if not full_path.exists():
-            abort(400, "directory does not exist")
+            await flash("Directory does not exist", "error")
+            return redirect(url_for(".get_import_repo"))
         if full_repo_path.exists():
-            abort(400, "repo name already exists")
-
+            await flash("Repo name already exists", "error")
+            return redirect(url_for(".get_import_repo"))
         if not is_valid_clone_url(url):
-            abort(400, "invalid repo url given")
+            await flash("Invalid repo url given", "error")
+            return redirect(url_for(".get_import_repo"))
 
         clone_repo(full_repo_path, url, True)
     except KeyError:

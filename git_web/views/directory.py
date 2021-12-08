@@ -1,4 +1,5 @@
 from quart import Blueprint, abort, redirect, render_template, request, url_for
+from quart.helpers import flash
 from quart_auth import login_required
 
 from ..helpers import (find_repos, is_valid_directory_name,
@@ -22,12 +23,14 @@ async def post_new_dir():
         abort(400, "directory name missing")
     repo_dir = repo_dir.strip().replace(" ", "-")
     if not is_valid_directory_name(repo_dir):
-        abort(400, "directory name contains restricted characters")
+        await flash("Directory name contains restricted characters", "error")
+        return redirect(url_for(".get_new_dir"))
 
     full_path = safe_combine_full_dir(repo_dir)
 
     if full_path.exists():
-        abort(400, "already exists")
+        await flash("Directory already exists", "error")
+        return redirect(url_for(".get_new_dir"))
 
     full_path.mkdir()
 
@@ -39,13 +42,15 @@ async def post_new_dir():
 async def get_dir_delete(directory: str):
     full_path = safe_combine_full_dir(directory)
     if not full_path.exists():
-        abort(400, "directory does not exist")
+        await flash("Directory does not exist", "error")
+        return redirect(url_for("home.index"))
     try:
         next(full_path.iterdir())
     except StopIteration:
         full_path.rmdir()
     else:
-        abort(400, "directory not empty")
+        await flash("Directory not empty", "error")
+        return redirect(url_for(".repo_list", directory=directory))
     return redirect(url_for("home.index"))
 
 
