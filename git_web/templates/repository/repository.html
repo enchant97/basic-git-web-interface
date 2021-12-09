@@ -8,15 +8,7 @@ endblock %}
 <div class="repo">
     <div class="main down">
         <div class="control-bar">
-            <select onchange="select_navigate_to(this)" title="Branch">
-                {% if head %}
-                {% for name in branches %}
-                <option value="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=name) }}" {% if
-                    name==curr_branch %} selected {% endif %}>{% if name==head %}*{% endif %}{{
-                    name }}</option>
-                {% endfor %}
-                {% endif %}
-            </select>
+            {% include "/shared/includes/branch-select.html" %}
         </div>
         {% if root_tree %}
         <div class="down">
@@ -31,28 +23,7 @@ endblock %}
                         class="bnt" title="Commit Log">{{ macros.feather_img('list') }}</a>
                     {% endif %}
                 </div>
-                <table class="tree-objects">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for obj in root_tree %}
-                        <tr>
-                            <td>
-                                {% if obj.type_.value == "tree" %}
-                                {{ macros.feather_img('folder') }}
-                                {% else %}
-                                {{ macros.feather_img('file') }}
-                                {% endif %}</td>
-                            <td>{{ obj.file }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-
+                {% include "/shared/includes/tree.html" %}
             </div>
             <div id="rendered-text" class="panel">{{ readme_content|safe }}</div>
         </div>

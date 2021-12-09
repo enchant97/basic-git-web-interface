@@ -1,0 +1,23 @@
+<table class="tree-objects">
+    <thead>
+        <tr>
+            <th></th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for obj in root_tree %}
+        <tr>
+            {% if obj.type_.value == "tree" %}
+            <td>{{ macros.feather_img('folder') }}</td>
+            <td><a
+                    href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch, tree_path=obj.file) }}">{{
+                    obj.file.relative_to(tree_path) }}</a></td>
+            {% else %}
+            <td>{{ macros.feather_img('file') }}</td>
+            <td>{{ obj.file.relative_to(tree_path) }}</td>
+            {% endif %}
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

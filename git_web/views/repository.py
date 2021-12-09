@@ -1,6 +1,9 @@
 import shutil
+from pathlib import Path
+from typing import Optional
 
 from git_interface.branch import get_branches
+from git_interface.datatypes import Log, TreeContent
 from git_interface.exceptions import (GitException, NoBranchesException,
                                       PathDoesNotExistInRevException,
                                       UnknownRevisionException)
@@ -16,11 +19,12 @@ from quart import (Blueprint, abort, make_response, redirect, render_template,
 from quart.helpers import flash
 from quart_auth import login_required
 
-from ..helpers import (create_ssh_uri, find_dirs, get_config, is_commit_hash,
-                       is_name_reserved, is_valid_clone_url,
-                       is_valid_directory_name, is_valid_repo_name,
-                       pathlib_delete_ro_file, safe_combine_full_dir,
-                       safe_combine_full_dir_repo, sort_repo_tree)
+from ..helpers import (UnknownBranchName, create_ssh_uri, find_dirs,
+                       get_config, is_commit_hash, is_name_reserved,
+                       is_valid_clone_url, is_valid_directory_name,
+                       is_valid_repo_name, pathlib_delete_ro_file,
+                       safe_combine_full_dir, safe_combine_full_dir_repo,
+                       sort_repo_tree)
 
 blueprint = Blueprint("repository", __name__)
 
@@ -143,16 +147,10 @@ async def post_import_repo():
     return redirect(url_for(".repo_view", repo_dir=directory, repo_name=name))
 
 
-@blueprint.route("/<repo_dir>/<repo_name>", defaults={"branch": None})
-@blueprint.route("/<repo_dir>/<repo_name>/tree/<branch>")
-@login_required
-async def repo_view(repo_dir: str, repo_name: str, branch: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
-
-    ssh_url = create_ssh_uri(repo_path)
-
+def get_repo_view_content(
+        branch: str,
+        repo_path: Path,
+        tree_path: Optional[str] = None) -> tuple[str, list[str], tuple[TreeContent], Log]:
     head = None
     branches = None
     root_tree = None
@@ -167,40 +165,87 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
             branch = head
         elif branch not in branches:
             if head != branch:
-                abort(404)
+                raise UnknownBranchName()
 
         branches = list(branches)
         branches.append(head)
 
-        root_tree = ls_tree(repo_path, branch, False, False)
+        root_tree = ls_tree(repo_path, branch, False, False, tree_path)
         root_tree = sort_repo_tree(root_tree)
 
-        recent_log = next(get_logs(repo_path, branch))
+        recent_log = next(get_logs(repo_path, branch, 1))
+    return head, branches, root_tree, recent_log
 
-    # TODO implement more intelligent readme logic
-    readme_content = ""
-    if head:
-        try:
-            content = show_file(repo_path, branch, "README.md").decode()
-            md = MarkdownIt("gfm-like", {"html": False})
-            readme_content = md.render(content)
-        except PathDoesNotExistInRevException:
-            # no readme recognised
-            pass
 
-    return await render_template(
-        "repository/repository.html",
-        repo_dir=repo_dir,
-        repo_name=repo_name,
-        curr_branch=branch,
-        head=head,
-        branches=branches,
-        ssh_url=ssh_url,
-        repo_description=get_description(repo_path),
-        root_tree=root_tree,
-        readme_content=readme_content,
-        recent_log=recent_log,
-    )
+@blueprint.route("/<repo_dir>/<repo_name>", defaults={"branch": None})
+@blueprint.route("/<repo_dir>/<repo_name>/tree/<branch>")
+@login_required
+async def repo_view(repo_dir: str, repo_name: str, branch: str):
+    try:
+        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
+        if not repo_path.exists():
+            abort(404)
+
+        ssh_url = create_ssh_uri(repo_path)
+
+        head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path)
+
+        if branch is None:
+            branch = head
+
+        # TODO implement more intelligent readme logic
+        readme_content = ""
+        if head:
+            try:
+                content = show_file(repo_path, branch, "README.md").decode()
+                md = MarkdownIt("gfm-like", {"html": False})
+                readme_content = md.render(content)
+            except PathDoesNotExistInRevException:
+                # no readme recognised
+                pass
+    except (ValueError, UnknownBranchName):
+        abort(404)
+    else:
+        return await render_template(
+            "repository/repository.html",
+            repo_dir=repo_dir,
+            repo_name=repo_name,
+            curr_branch=branch,
+            head=head,
+            branches=branches,
+            ssh_url=ssh_url,
+            repo_description=get_description(repo_path),
+            root_tree=root_tree,
+            readme_content=readme_content,
+            recent_log=recent_log,
+            tree_path="",
+        )
+
+
+@blueprint.get("/<repo_dir>/<repo_name>/tree/<branch>/<path:tree_path>/")
+@login_required
+async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: str):
+    try:
+        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
+        if not repo_path.exists():
+            abort(404)
+
+        head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, tree_path)
+
+    except (ValueError, UnknownBranchName):
+        abort(404)
+    else:
+        return await render_template(
+            "repository/tree.html",
+            repo_dir=repo_dir,
+            repo_name=repo_name,
+            curr_branch=branch,
+            head=head,
+            branches=branches,
+            root_tree=root_tree,
+            recent_log=recent_log,
+            tree_path=tree_path,
+        )
 
 
 @blueprint.get("/<repo_dir>/<repo_name>/settings")

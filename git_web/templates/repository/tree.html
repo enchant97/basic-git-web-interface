@@ -1,0 +1,29 @@
+{% extends "/shared/base.html" %}
+{% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
+{% block title2 %}Tree{% endblock %}
+{% block header_one %}<a href="{{ url_for('directory.repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
+    href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a>{%
+endblock %}
+{% block main %}
+<div class="main down">
+    <div class="control-bar">
+        {% include "/shared/includes/branch-select.html" %}
+        <span>{{ repo_name }}/{{ tree_path }}</span>
+    </div>
+    <div class="down">
+        <div class="panel">
+            <div class="tree-nav">
+                <div>
+                    <a href="mailto:{{ recent_log.author_email }}">{{ recent_log.author_email|truncate(12) }}</a>
+                    <span title="{{ recent_log.subject }}">{{ recent_log.subject|truncate(30) }}</span>
+                </div>
+                {% if head %}
+                <a href="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}"
+                    class="bnt" title="Commit Log">{{ macros.feather_img('list') }}</a>
+                {% endif %}
+            </div>
+            {% include "/shared/includes/tree.html" %}
+        </div>
+    </div>
+</div>
+{% endblock %}

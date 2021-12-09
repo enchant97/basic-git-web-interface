@@ -21,6 +21,10 @@ RESERVED_NAMES = (
 )
 
 
+class UnknownBranchName(Exception):
+    pass
+
+
 @dataclass
 class Config:
     """
