@@ -17,6 +17,11 @@ async def redirect_to_login(*_):  # pragma: no cover
     return redirect(url_for("auth.get_login"))
 
 
+@app.get("/favicon.ico")
+async def redirect_favicon():
+    return redirect(url_for("static", filename="favicon.ico"))
+
+
 def create_app() -> Quart:
     # load config
     config = get_config()

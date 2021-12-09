@@ -1,4 +1,5 @@
 import shutil
+from mimetypes import guess_type
 from pathlib import Path
 from typing import Optional
 
@@ -222,13 +223,16 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         )
 
 
-@blueprint.get("/<repo_dir>/<repo_name>/tree/<branch>/<path:tree_path>/")
+@blueprint.get("/<repo_dir>/<repo_name>/tree/<branch>/<path:tree_path>")
 @login_required
 async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: str):
     try:
         repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
             abort(404)
+
+        if not tree_path.endswith("/"):
+            tree_path += "/"
 
         head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, tree_path)
 
@@ -246,6 +250,25 @@ async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: s
             recent_log=recent_log,
             tree_path=tree_path,
         )
+
+
+@blueprint.get("/<repo_dir>/<repo_name>/raw/<branch>/<path:file_path>")
+@login_required
+async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_path: str):
+    try:
+        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
+        if not repo_path.exists():
+            abort(404)
+
+        content = show_file(repo_path, branch, file_path)
+        raw_response = await make_response(content)
+        # TODO add more file types & content guessing as fallback
+        mimetype = guess_type(file_path)[0]
+        raw_response.mimetype = mimetype if mimetype is not None else "application/octet-stream"
+
+        return raw_response
+    except (ValueError, PathDoesNotExistInRevException):
+        abort(404)
 
 
 @blueprint.get("/<repo_dir>/<repo_name>/settings")
