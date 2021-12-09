@@ -24,6 +24,8 @@ def create_app() -> Quart:
     # this is allowing us to run through a proxy
     app.config["QUART_AUTH_COOKIE_SECURE"] = False
     app.config["VERSION"] = __version__
+    app.config["SHOW_SSH_PUB"] = True if get_config().SSH_PUB_KEY_PATH else False
+    app.config["SHOW_SSH_AUTHORISED"] = True if get_config().SSH_AUTH_KEYS_PATH else False
     # register blueprints
     app.register_blueprint(health_check.blueprint)
     app.register_blueprint(home.blueprint)

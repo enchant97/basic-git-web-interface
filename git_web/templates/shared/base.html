@@ -24,6 +24,7 @@
                 macros.feather_img('folder-plus') }}</a>
             <a href="{{ url_for('repository.get_new_repo') }}" class="bnt" title="New Repo">{{
                 macros.feather_img('plus') }}</a>
+            <a href="{{ url_for('home.get_settings') }}" class="bnt" title="Settings">{{ macros.feather_img('settings') }}</a>
             {% endif %}
             <button id="themeToggleBnt" title="Change Site Theme">{{ macros.feather_img('sun') }}</button>
             {% block nav %}{% endblock %}

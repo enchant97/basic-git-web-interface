@@ -56,19 +56,25 @@ footer,
 ul,
 ol,
 li,
-code {
+code,
+textarea {
   font-size: 0.9em;
   font-family: var(--main-font);
   color: var(--font-dark);
 }
 
 input,
-select {
+select,
+textarea {
   border-radius: var(--border-rad);
   border: none;
   background-color: var(--bnt-col);
   padding: 8px;
   color: var(--font-light);
+}
+
+textarea {
+  resize: none;
 }
 
 a {

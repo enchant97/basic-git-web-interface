@@ -5,7 +5,7 @@ import sys
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Optional
 from urllib.parse import urlparse
 
 from git_interface.datatypes import TreeContent, TreeContentTypes
@@ -17,6 +17,7 @@ RESERVED_NAMES = (
     "new",
     "new-dir",
     "import",
+    "settings",
 )
 
 
@@ -32,6 +33,8 @@ class Config:
     DISALLOWED_DIRS: list[str]
     DEFAULT_BRANCH: str
     MAX_COMMIT_LOG_COUNT: int
+    SSH_PUB_KEY_PATH: Optional[Path] = None
+    SSH_AUTH_KEYS_PATH: Optional[Path] = None
 
 
 @cache
@@ -51,6 +54,8 @@ def get_config() -> Config:  # pragma: no cover
             DISALLOWED_DIRS=os.environ.get("DISALLOWED_DIRS", "").split(","),
             DEFAULT_BRANCH=os.environ.get("DEFAULT_BRANCH", "main"),
             MAX_COMMIT_LOG_COUNT=os.environ.get("MAX_COMMIT_LOG_COUNT", 20),
+            SSH_PUB_KEY_PATH=os.environ.get("SSH_PUB_KEY_PATH", None),
+            SSH_AUTH_KEYS_PATH=os.environ.get("SSH_AUTH_KEYS_PATH", None),
         )
     except KeyError:
         print("missing required configs", file=sys.stderr)

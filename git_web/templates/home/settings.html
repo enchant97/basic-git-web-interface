@@ -1,0 +1,27 @@
+{% extends "/shared/base.html" %}
+{% block title %}Settings{% endblock %}
+{% block main %}
+
+<section class="sub down">
+    <h2>SSH</h2>
+    {% if not config.SHOW_SSH_PUB and not config.SHOW_SSH_AUTHORISED %}
+    <p>SSH key access has been disabled in server config.</p>
+    {% else %}
+    {% if config.SHOW_SSH_PUB %}
+    <div class="sub down">
+        <h3>Public Key</h3>
+        <textarea name="ssh-public-key" cols="30" rows="10" aria-label="ssh public key" readonly>{{ ssh_public_key }}</textarea>
+    </div>
+    {% endif %}
+    {% if config.SHOW_SSH_AUTHORISED %}
+    <form class="sub down" action="{{ url_for('home.post_update_ssh_authorised_keys') }}" method="post">
+        <h3>Authorised Keys</h3>
+        <textarea name="ssh-authorised-keys" cols="30" rows="10"
+            aria-label="ssh authorised keys">{{ ssh_authorised_keys }}</textarea>
+        <button type="submit" title="Update">{{ macros.feather_img('save') }}</button>
+    </form>
+    {% endif %}
+    {% endif %}
+</section>
+
+{% endblock %}
