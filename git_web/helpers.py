@@ -214,3 +214,14 @@ def is_name_reserved(name: str) -> bool:
         :return: whether name is reserved
     """
     return name in RESERVED_NAMES
+
+
+def does_path_contain(path: Path, name: str) -> bool:
+    """
+    Checks whether a path contains a given name
+
+        :param path: The path
+        :param name: The name to check
+        :return: Whether a match was found
+    """
+    return True if name in path.name else False

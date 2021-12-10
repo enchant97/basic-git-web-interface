@@ -2,6 +2,10 @@
 {% block title %}{{ directory }}{% endblock %}
 {% block title2 %}Repositories{% endblock %}
 {% block main %}
+<form action="" method="get">
+    <input type="text" name="q" aria-label="search box" value="{{ search_query }}" placeholder="search or navigate to..." autofocus>
+    <button type="submit" title="Search">{{macros.feather_img('search') }}</button>
+</form>
 <div class="sub down">
     {% for path in repo_paths %}
     <a href="{{ url_for('repository.repo_view', repo_dir=directory, repo_name=path.stem) }}" class="bnt">{{ path.stem

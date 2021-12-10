@@ -127,3 +127,14 @@ class TestHelpers:
         assert helpers.is_name_reserved("login") is True
         assert helpers.is_name_reserved("logout") is True
         assert helpers.is_name_reserved("random") is False
+
+    def test_does_path_contain(self):
+        paths = (
+            Path("test/hello"),
+            Path("a/something"),
+            Path("test/hello this is a test"),
+            Path("something/my filename"),
+            Path("test/this is amazing hello"),
+        )
+        result = tuple(filter(lambda path: helpers.does_path_contain(path, "hello"), paths))
+        assert len(result) == 3
