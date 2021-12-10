@@ -19,6 +19,7 @@ RESERVED_NAMES = (
     "import",
     "settings",
 )
+MAX_BLOB_SIZE = 2*10**6
 
 
 class UnknownBranchName(Exception):

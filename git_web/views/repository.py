@@ -1,9 +1,10 @@
+import mimetypes
 import shutil
-from mimetypes import guess_type
 from pathlib import Path
 from typing import Optional
 
 from git_interface.branch import get_branches
+from git_interface.cat_file import get_object_size
 from git_interface.datatypes import Log, TreeContent
 from git_interface.exceptions import (GitException, NoBranchesException,
                                       PathDoesNotExistInRevException,
@@ -20,8 +21,8 @@ from quart import (Blueprint, abort, make_response, redirect, render_template,
 from quart.helpers import flash
 from quart_auth import login_required
 
-from ..helpers import (UnknownBranchName, create_ssh_uri, find_dirs,
-                       get_config, is_commit_hash, is_name_reserved,
+from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
+                       find_dirs, get_config, is_commit_hash, is_name_reserved,
                        is_valid_clone_url, is_valid_directory_name,
                        is_valid_repo_name, pathlib_delete_ro_file,
                        safe_combine_full_dir, safe_combine_full_dir_repo,
@@ -252,6 +253,53 @@ async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: s
         )
 
 
+@blueprint.get("/<repo_dir>/<repo_name>/blob/<branch>/<path:file_path>")
+@login_required
+async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_path: str):
+    try:
+        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
+        if not repo_path.exists():
+            abort(404)
+
+        head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, file_path)
+
+        content_type = None
+        content = None
+
+        # TODO add more file types & content guessing as fallback
+        mimetype =  mimetypes.guess_type(file_path)[0]
+
+        if mimetype == None:
+            pass
+        elif mimetype.startswith("image"):
+            content_type = "IMAGE"
+            content = url_for(
+                ".get_repo_raw_file", repo_dir=repo_dir,
+                repo_name=repo_name, branch=branch,
+                file_path=file_path
+            )
+        elif mimetype.startswith("text"):
+            if get_object_size(repo_path, branch, file_path) < MAX_BLOB_SIZE:
+                content_type = "TEXT"
+                content = show_file(repo_path, branch, file_path).decode()
+
+        return await render_template(
+            "repository/blob.html",
+                repo_dir=repo_dir,
+                repo_name=repo_name,
+                curr_branch=branch,
+                head=head,
+                branches=branches,
+                root_tree=root_tree,
+                recent_log=recent_log,
+                tree_path=file_path,
+                content_type=content_type,
+                content=content,
+        )
+    except (ValueError, PathDoesNotExistInRevException):
+        abort(404)
+
+
 @blueprint.get("/<repo_dir>/<repo_name>/raw/<branch>/<path:file_path>")
 @login_required
 async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_path: str):
@@ -263,7 +311,7 @@ async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_pat
         content = show_file(repo_path, branch, file_path)
         raw_response = await make_response(content)
         # TODO add more file types & content guessing as fallback
-        mimetype = guess_type(file_path)[0]
+        mimetype = mimetypes.guess_type(file_path)[0]
         raw_response.mimetype = mimetype if mimetype is not None else "application/octet-stream"
 
         return raw_response
