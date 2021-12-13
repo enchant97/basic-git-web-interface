@@ -24,9 +24,9 @@ from quart_auth import login_required
 from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
                        find_dirs, get_config, is_commit_hash, is_name_reserved,
                        is_valid_clone_url, is_valid_directory_name,
-                       is_valid_repo_name, pathlib_delete_ro_file,
-                       safe_combine_full_dir, safe_combine_full_dir_repo,
-                       sort_repo_tree)
+                       is_valid_repo_name, path_to_tree_components,
+                       pathlib_delete_ro_file, safe_combine_full_dir,
+                       safe_combine_full_dir_repo, sort_repo_tree)
 
 blueprint = Blueprint("repository", __name__)
 
@@ -237,6 +237,8 @@ async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: s
 
         head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, tree_path)
 
+        split_path = path_to_tree_components(Path(tree_path))
+
     except (ValueError, UnknownBranchName):
         abort(404)
     else:
@@ -250,6 +252,7 @@ async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: s
             root_tree=root_tree,
             recent_log=recent_log,
             tree_path=tree_path,
+            split_path=split_path,
         )
 
 
@@ -262,6 +265,8 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
             abort(404)
 
         head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, file_path)
+
+        split_path = path_to_tree_components(Path(file_path))
 
         content_type = None
         content = None
@@ -295,6 +300,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
                 tree_path=file_path,
                 content_type=content_type,
                 content=content,
+                split_path=split_path
         )
     except (ValueError, PathDoesNotExistInRevException):
         abort(404)

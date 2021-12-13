@@ -138,3 +138,16 @@ class TestHelpers:
         )
         result = tuple(filter(lambda path: helpers.does_path_contain(path, "hello"), paths))
         assert len(result) == 3
+
+    def test_path_to_tree_components(self):
+        path = Path("a/b/c/test.txt")
+
+        excepted_output = (
+            helpers.PathComponent(Path("a"), "a", False),
+            helpers.PathComponent(Path("a/b"), "b", False),
+            helpers.PathComponent(Path("a/b/c"), "c", False),
+            helpers.PathComponent(Path("a/b/c/test.txt"), "test.txt", True),
+        )
+        actual_output = tuple(helpers.path_to_tree_components(path))
+
+        assert excepted_output == actual_output

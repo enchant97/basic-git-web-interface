@@ -8,7 +8,17 @@ endblock %}
 <div class="main down">
     <div class="control-bar">
         {% include "/shared/includes/branch-select.html" %}
-        <span>{{ repo_name }}/{{ tree_path }}</span>
+        <span>
+            <a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a> /
+            {% for component in split_path %}
+            {% if component.is_end %}
+            <span>{{ component.name }}</span>
+            {% else %}
+            <a href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch, tree_path=component.full_path) }}">{{ component.name }}</a>
+            {% endif %}
+            /
+            {% endfor %}
+        </span>
     </div>
     <div class="down">
         <div class="panel">

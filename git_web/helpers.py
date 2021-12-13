@@ -5,7 +5,7 @@ import sys
 from dataclasses import dataclass
 from functools import cache
 from pathlib import Path
-from typing import Iterable, Optional
+from typing import Generator, Iterable, Optional
 from urllib.parse import urlparse
 
 from git_interface.datatypes import TreeContent, TreeContentTypes
@@ -24,6 +24,18 @@ MAX_BLOB_SIZE = 2*10**6
 
 class UnknownBranchName(Exception):
     pass
+
+
+@dataclass
+class PathComponent:
+    """
+    A tree path component,
+    containing the full path,
+    name and whether it is the last section
+    """
+    full_path: Path
+    name: str
+    is_end: bool
 
 
 @dataclass
@@ -225,3 +237,20 @@ def does_path_contain(path: Path, name: str) -> bool:
         :return: Whether a match was found
     """
     return True if name in path.name else False
+
+
+def path_to_tree_components(path: Path) -> Generator[None, None, PathComponent]:
+    """
+    Get the components of a repo tree path
+
+        :param path: The path to split
+        :yield: the PathComponent
+    """
+    parts = path.parts
+    max_i = len(parts) - 1
+    curr_path = Path()
+
+    for i, part in enumerate(parts):
+        is_end = True if max_i == i else False
+        curr_path = curr_path / part
+        yield PathComponent(curr_path, part, is_end)
