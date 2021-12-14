@@ -14,12 +14,24 @@ __all__ = [
 
 
 def is_allowed_dir(name: str) -> bool:
+    """
+    Whether given name is allowed for a directory name
+
+        :param name: The name
+        :return: Whether it is allowed
+    """
     if name in get_config().DISALLOWED_DIRS:
         return False
     return True
 
 
-def is_valid_clone_url(url: str):
+def is_valid_clone_url(url: str) -> bool:
+    """
+    Whether given url is a valid clone url
+
+        :param url: The url
+        :return: Whether it is valid
+    """
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https"):
         return False
@@ -27,6 +39,12 @@ def is_valid_clone_url(url: str):
 
 
 def is_commit_hash(possible_hash: str) -> bool:
+    """
+    Whether the given string is a valid commit hash format
+
+        :param possible_hash: The possible hash
+        :return: Whether it is valid
+    """
     return True if re.match(r"^[a-zA-Z0-9]+$", possible_hash) else False
 
 

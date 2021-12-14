@@ -1,7 +1,7 @@
 import os
 import stat
 from pathlib import Path
-from typing import Generator, Iterable
+from typing import Generator, Iterable, Iterator
 
 from git_interface.datatypes import TreeContent, TreeContentTypes
 
@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 
-def find_repos(repo_dir: Path, make_relative: bool = False):
+def find_repos(repo_dir: Path, make_relative: bool = False) -> Generator[None, None, Path]:
     """
     Find git bare repos (.git) in given directory,
     will not recurse.
@@ -38,14 +38,32 @@ def find_repos(repo_dir: Path, make_relative: bool = False):
 
 
 def combine_full_dir(repo_dir: str) -> Path:
+    """
+    Combine a repo directory name into a system path
+
+        :param repo_dir: The repo directory name
+        :return: The combined path
+    """
     return get_config().REPOS_PATH / repo_dir
 
 
 def combine_full_dir_repo(repo_dir: str, repo_name: str) -> Path:
+    """
+    Combine a repo directory name and repo name into a system path
+
+        :param repo_dir: The repo directory name
+        :param repo_name: The repo name
+        :return: The combined path
+    """
     return combine_full_dir(repo_dir) / (repo_name + ".git")
 
 
-def find_dirs() -> filter:
+def find_dirs() -> Iterator[str]:
+    """
+    Find allowed directories in a repos folder
+
+        :return: Directory path names
+    """
     return filter(
         is_allowed_dir,
         next(os.walk(get_config().REPOS_PATH))[1]
@@ -76,6 +94,12 @@ def sort_repo_tree(repo_tree: Iterable[TreeContent]) -> tuple[TreeContent]:
 
 
 def create_ssh_uri(repo_path: Path) -> str:
+    """
+    Create a ssh uri for a given repository path
+
+        :param repo_path: The repository path
+        :return: the ssh uri
+    """
     return get_config().REPOS_SSH_BASE + ":" +\
         str(repo_path.relative_to(get_config().REPOS_PATH)).replace("\\", "/")
 
