@@ -1,91 +1,22 @@
 import os
-import re
 import stat
-import sys
-from dataclasses import dataclass
-from functools import cache
 from pathlib import Path
-from typing import Generator, Iterable, Optional
-from urllib.parse import urlparse
+from typing import Generator, Iterable
 
 from git_interface.datatypes import TreeContent, TreeContentTypes
 
-RESERVED_NAMES = (
-    "auth",
-    "login",
-    "logout",
-    "new",
-    "new-dir",
-    "import",
-    "settings",
-)
-MAX_BLOB_SIZE = 2*10**6
+from .checkers import (is_allowed_dir, is_valid_directory_name,
+                       is_valid_repo_name)
+from .config import get_config
+from .types import PathComponent
 
-
-class UnknownBranchName(Exception):
-    pass
-
-
-@dataclass
-class PathComponent:
-    """
-    A tree path component,
-    containing the full path,
-    name and whether it is the last section
-    """
-    full_path: Path
-    name: str
-    is_end: bool
-
-
-@dataclass
-class Config:
-    """
-    the app config format
-    """
-    REPOS_PATH: Path
-    REPOS_SSH_BASE: str
-    LOGIN_PASSWORD: str
-    SECRET_KEY: str
-    DISALLOWED_DIRS: list[str]
-    DEFAULT_BRANCH: str
-    MAX_COMMIT_LOG_COUNT: int
-    SSH_PUB_KEY_PATH: Optional[Path] = None
-    SSH_AUTH_KEYS_PATH: Optional[Path] = None
-
-
-@cache
-def get_config() -> Config:  # pragma: no cover
-    """
-    get the app config from environment variables.
-    will exit(1) if error occurs
-
-        :return: the app config
-    """
-    try:
-        return Config(
-            REPOS_PATH=Path(os.environ["REPOS_PATH"]),
-            REPOS_SSH_BASE=os.environ["REPOS_SSH_BASE"],
-            LOGIN_PASSWORD=os.environ["LOGIN_PASSWORD"],
-            SECRET_KEY=os.environ["SECRET_KEY"],
-            DISALLOWED_DIRS=os.environ.get("DISALLOWED_DIRS", "").split(","),
-            DEFAULT_BRANCH=os.environ.get("DEFAULT_BRANCH", "main"),
-            MAX_COMMIT_LOG_COUNT=os.environ.get("MAX_COMMIT_LOG_COUNT", 20),
-            SSH_PUB_KEY_PATH=os.environ.get("SSH_PUB_KEY_PATH", None),
-            SSH_AUTH_KEYS_PATH=os.environ.get("SSH_AUTH_KEYS_PATH", None),
-        )
-    except KeyError:
-        print("missing required configs", file=sys.stderr)
-        exit(1)
-    except ValueError:
-        print("config in wrong format", file=sys.stderr)
-        exit(1)
-
-
-def is_allowed_dir(name: str) -> bool:
-    if name in get_config().DISALLOWED_DIRS:
-        return False
-    return True
+__all__ = [
+    "find_repos", "combine_full_dir",
+    "combine_full_dir_repo", "find_dirs",
+    "sort_repo_tree", "create_ssh_uri",
+    "pathlib_delete_ro_file", "safe_combine_full_dir",
+    "safe_combine_full_dir_repo", "path_to_tree_components",
+]
 
 
 def find_repos(repo_dir: Path, make_relative: bool = False):
@@ -149,40 +80,9 @@ def create_ssh_uri(repo_path: Path) -> str:
         str(repo_path.relative_to(get_config().REPOS_PATH)).replace("\\", "/")
 
 
-def is_valid_clone_url(url: str):
-    parsed = urlparse(url)
-    if parsed.scheme not in ("http", "https"):
-        return False
-    return True
-
-
 def pathlib_delete_ro_file(action, name, exc):  # pragma: no cover
     os.chmod(name, stat.S_IWRITE)
     os.remove(name)
-
-
-def is_commit_hash(possible_hash: str) -> bool:
-    return True if re.match(r"^[a-zA-Z0-9]+$", possible_hash) else False
-
-
-def is_valid_repo_name(name: str) -> bool:
-    """
-    Checks whether given name can be a valid repository name
-
-        :param name: the name to check
-        :return: whether given name is valid
-    """
-    return True if re.match(r"^[a-zA-Z0-9-_]+$", name) and len(name) <= 100 else False
-
-
-def is_valid_directory_name(name: str) -> bool:
-    """
-    Checks whether given name can be a valid directory name
-
-        :param name: the name to check
-        :return: whether given name is valid
-    """
-    return is_valid_repo_name(name)
 
 
 def safe_combine_full_dir(repo_dir: str) -> Path:
@@ -215,28 +115,6 @@ def safe_combine_full_dir_repo(repo_dir: str, repo_name: str) -> Path:
     if not is_valid_repo_name(repo_name):
         raise ValueError("'repo_name' not valid")
     return combine_full_dir_repo(repo_dir, repo_name)
-
-
-def is_name_reserved(name: str) -> bool:
-    """
-    Check whether the name is reserved,
-    for use with repo name or repo directory
-
-        :param name: name to test
-        :return: whether name is reserved
-    """
-    return name in RESERVED_NAMES
-
-
-def does_path_contain(path: Path, name: str) -> bool:
-    """
-    Checks whether a path contains a given name
-
-        :param path: The path
-        :param name: The name to check
-        :return: Whether a match was found
-    """
-    return True if name in path.name else False
 
 
 def path_to_tree_components(path: Path) -> Generator[None, None, PathComponent]:
