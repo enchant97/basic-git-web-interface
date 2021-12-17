@@ -276,6 +276,10 @@ table.tree-objects tbody tr td a:hover {
   overflow: auto;
 }
 
+#rendered-text img {
+  max-width: 100%;
+}
+
 #welcome-panel img {
   max-width: 25%;
   margin: auto;

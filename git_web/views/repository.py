@@ -199,7 +199,21 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         if head:
             try:
                 content = show_file(repo_path, branch, "README.md").decode()
-                readme_content = render_markdown(content)
+                readme_content = render_markdown(
+                    content,
+                    url_for(
+                        ".get_repo_blob_file",
+                        repo_dir=repo_dir,
+                        repo_name=repo_name,
+                        branch=branch,
+                        file_path=""),
+                    url_for(
+                        ".get_repo_raw_file",
+                        repo_dir=repo_dir,
+                        repo_name=repo_name,
+                        branch=branch,
+                        file_path="")
+                )
             except PathDoesNotExistInRevException:
                 # no readme recognised
                 pass
@@ -287,7 +301,16 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
 
                 if mimetype.endswith("markdown"):
                     content_type = "HTML"
-                    content = render_markdown(content)
+                    content = render_markdown(
+                        content,
+                        url_relative_to_raw=url_for(
+                            ".get_repo_raw_file",
+                            repo_dir=repo_dir,
+                            repo_name=repo_name,
+                            branch=branch,
+                            file_path=""
+                        )
+                    )
                 else:
                     content_type = "TEXT"
                     content = highlight_by_ext(content, file_path)
