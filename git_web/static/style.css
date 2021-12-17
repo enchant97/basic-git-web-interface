@@ -272,7 +272,7 @@ table.tree-objects tbody tr td a:hover {
   width: 50%;
 }
 
-#rendered-text pre {
+#rendered-text {
   overflow: auto;
 }
 

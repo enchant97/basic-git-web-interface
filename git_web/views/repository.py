@@ -1,4 +1,3 @@
-import mimetypes
 import shutil
 from pathlib import Path
 from typing import Optional
@@ -21,8 +20,8 @@ from quart.helpers import flash
 from quart_auth import login_required
 
 from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
-                       find_dirs, get_config, highlight_by_ext, is_commit_hash,
-                       is_name_reserved, is_valid_clone_url,
+                       find_dirs, get_config, guess_mimetype, highlight_by_ext,
+                       is_commit_hash, is_name_reserved, is_valid_clone_url,
                        is_valid_directory_name, is_valid_repo_name,
                        path_to_tree_components, pathlib_delete_ro_file,
                        render_markdown, safe_combine_full_dir,
@@ -271,8 +270,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
         content_type = None
         content = None
 
-        # TODO add more file types & content guessing as fallback
-        mimetype =  mimetypes.guess_type(file_path)[0]
+        mimetype = guess_mimetype(file_path)
 
         if mimetype == None:
             pass
@@ -285,9 +283,14 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
             )
         elif mimetype.startswith("text"):
             if get_object_size(repo_path, branch, file_path) < MAX_BLOB_SIZE:
-                content_type = "TEXT"
                 content = show_file(repo_path, branch, file_path).decode()
-                content = highlight_by_ext(content, file_path)
+
+                if mimetype.endswith("markdown"):
+                    content_type = "HTML"
+                    content = render_markdown(content)
+                else:
+                    content_type = "TEXT"
+                    content = highlight_by_ext(content, file_path)
 
         return await render_template(
             "repository/blob.html",
@@ -319,8 +322,7 @@ async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_pat
 
         content = show_file(repo_path, branch, file_path)
         raw_response = await make_response(content)
-        # TODO add more file types & content guessing as fallback
-        mimetype = mimetypes.guess_type(file_path)[0]
+        mimetype = guess_mimetype(file_path)
         raw_response.mimetype = mimetype if mimetype is not None else "application/octet-stream"
 
         return raw_response

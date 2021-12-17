@@ -6,6 +6,7 @@ from web_health_checker.contrib import quart as health_check
 
 from . import __version__
 from .helpers import get_config
+from .helpers.known_mimetypes import register_extra_types
 from .views import auth, directory, home, repository
 
 app = Quart(__name__)
@@ -23,6 +24,8 @@ async def redirect_favicon():
 
 
 def create_app() -> Quart:
+    # register extra MIME types
+    register_extra_types()
     # load config
     config = get_config()
     app.secret_key = config.SECRET_KEY
