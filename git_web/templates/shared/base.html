@@ -9,7 +9,7 @@
     <title>{% block title2 %}{% endblock %} {% block title %}{% endblock %} | Basic Git Web Interface</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&family=Open+Sans&family=Roboto&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="{{ url_for('static', filename='theme-changer.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
@@ -24,7 +24,8 @@
                 macros.feather_img('folder-plus') }}</a>
             <a href="{{ url_for('repository.get_new_repo') }}" class="bnt" title="New Repo">{{
                 macros.feather_img('plus') }}</a>
-            <a href="{{ url_for('home.get_settings') }}" class="bnt" title="Settings">{{ macros.feather_img('settings') }}</a>
+            <a href="{{ url_for('home.get_settings') }}" class="bnt" title="Settings">{{ macros.feather_img('settings')
+                }}</a>
             {% endif %}
             <button id="themeToggleBnt" title="Change Site Theme">{{ macros.feather_img('sun') }}</button>
             {% block nav %}{% endblock %}

@@ -24,7 +24,7 @@ endblock %}
     </div>
     <div class="down panel">
         {% if content_type == "TEXT" %}
-        <pre><code>{{ content }}</code></pre>
+        <pre><code>{{ content|safe }}</code></pre>
         {% elif content_type == "IMAGE" %}
         <img style="max-width: 30%;margin: auto;" src="{{ content }}" alt="blob image preview">
         {% else %}

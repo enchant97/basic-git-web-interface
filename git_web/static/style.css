@@ -7,6 +7,7 @@
   --border-rad: 10px;
   --header-font: 'Roboto', sans-serif;
   --main-font: 'Open Sans', sans-serif;
+  --code-font: 'Fira Mono', monospace;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -19,20 +20,21 @@
   }
 }
 
-body::-webkit-scrollbar {
+::-webkit-scrollbar {
   width: 8px;
+  height: 8px;
   background-color: var(--bg-col);
 }
 
-body::-webkit-scrollbar-thumb {
+::-webkit-scrollbar-thumb {
   background-color: #4b4b4b;
 }
 
-body::-webkit-scrollbar-thumb:hover {
+::-webkit-scrollbar-thumb:hover {
   background-color: #353535;
 }
 
-body::-webkit-scrollbar-thumb:active {
+::-webkit-scrollbar-thumb:active {
   background-color: black;
 }
 
@@ -56,10 +58,16 @@ footer,
 ul,
 ol,
 li,
-code,
 textarea {
   font-size: 1em;
   font-family: var(--main-font);
+  color: var(--font-dark);
+}
+
+pre code,
+pre code span {
+  font-size: 0.9em;
+  font-family: var(--code-font);
   color: var(--font-dark);
 }
 
@@ -302,4 +310,52 @@ table.tree-objects tbody tr td a:hover {
   .repo .aside {
     max-width: 100%;
   }
+}
+
+/*
+Code Styling
+
+originally generated using: 'pygmentize -S default -f html > pygments.css
+*/
+.k,
+.ch,
+.cp,
+.cpf,
+.cs {
+  color: #14832f;
+}
+
+.kc,
+.kd,
+.kn,
+.kp,
+.kr,
+.ow,
+.mi {
+  color: #c42d2d;
+}
+
+.kt,
+.nb,
+.nc {
+  color: #1a6bb8;
+}
+
+.cm,
+.c1,
+.s,
+.sa,
+.sb,
+.sc,
+.dl,
+.sd,
+.s2,
+.se,
+.sh,
+.si,
+.sx,
+.sr,
+.s1,
+.ss {
+  color: #527275;
 }

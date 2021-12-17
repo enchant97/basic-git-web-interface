@@ -15,17 +15,17 @@ from git_interface.show import show_file
 from git_interface.utils import (ArchiveTypes, clone_repo, get_archive,
                                  get_description, init_repo, run_maintenance,
                                  set_description)
-from markdown_it import MarkdownIt
 from quart import (Blueprint, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart.helpers import flash
 from quart_auth import login_required
 
 from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
-                       find_dirs, get_config, is_commit_hash, is_name_reserved,
-                       is_valid_clone_url, is_valid_directory_name,
-                       is_valid_repo_name, path_to_tree_components,
-                       pathlib_delete_ro_file, safe_combine_full_dir,
+                       find_dirs, get_config, highlight_by_ext, is_commit_hash,
+                       is_name_reserved, is_valid_clone_url,
+                       is_valid_directory_name, is_valid_repo_name,
+                       path_to_tree_components, pathlib_delete_ro_file,
+                       render_markdown, safe_combine_full_dir,
                        safe_combine_full_dir_repo, sort_repo_tree)
 
 blueprint = Blueprint("repository", __name__)
@@ -200,8 +200,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         if head:
             try:
                 content = show_file(repo_path, branch, "README.md").decode()
-                md = MarkdownIt("gfm-like", {"html": False})
-                readme_content = md.render(content)
+                readme_content = render_markdown(content)
             except PathDoesNotExistInRevException:
                 # no readme recognised
                 pass
@@ -264,6 +263,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
         if not repo_path.exists():
             abort(404)
 
+        file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
         head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, file_path)
 
         split_path = path_to_tree_components(Path(file_path))
@@ -287,6 +287,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
             if get_object_size(repo_path, branch, file_path) < MAX_BLOB_SIZE:
                 content_type = "TEXT"
                 content = show_file(repo_path, branch, file_path).decode()
+                content = highlight_by_ext(content, file_path)
 
         return await render_template(
             "repository/blob.html",
@@ -313,6 +314,8 @@ async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_pat
         repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
             abort(404)
+
+        file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
 
         content = show_file(repo_path, branch, file_path)
         raw_response = await make_response(content)
