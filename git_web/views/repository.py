@@ -10,6 +10,7 @@ from git_interface.exceptions import (GitException, NoBranchesException,
                                       UnknownRevisionException)
 from git_interface.log import get_logs
 from git_interface.ls import ls_tree
+from git_interface.rev_list import get_commit_count
 from git_interface.show import show_file
 from git_interface.utils import (ArchiveTypes, clone_repo, get_archive,
                                  get_description, init_repo, run_maintenance,
@@ -194,6 +195,8 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
         if branch is None:
             branch = head
 
+        commit_count = get_commit_count(repo_path, branch)
+
         # TODO implement more intelligent readme logic
         readme_content = ""
         if head:
@@ -233,6 +236,7 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
             readme_content=readme_content,
             recent_log=recent_log,
             tree_path="",
+            commit_count=commit_count,
         )
 
 
@@ -464,21 +468,21 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
         after_commit_hash = request.args.get("after")
         if after_commit_hash:
             if is_commit_hash(after_commit_hash):
-                # TODO use <hash>^ when git-interface has parent hash detection
-                rev_range = f"{after_commit_hash}"
+                rev_range = f"{after_commit_hash}^"
             else:
                 abort(400, "Invalid after param argument")
 
-        logs = tuple(get_logs(repo_path, rev_range,
-                     get_config().MAX_COMMIT_LOG_COUNT))
-
-        if after_commit_hash:
-            # TODO remove when <hash>^ is used
-            logs = logs[1:]
+        try:
+            logs = tuple(get_logs(repo_path, rev_range,
+                        get_config().MAX_COMMIT_LOG_COUNT))
+        except GitException:
+            # TODO replace GitException with specific exception when ambiguous argument is handled
+            logs = tuple()
 
         last_commit_hash = None
-        if len(logs) == get_config().MAX_COMMIT_LOG_COUNT:
-            last_commit_hash = logs[-1].commit_hash
+        if len(logs) > 0:
+            if logs[-1].parent_hash:
+                last_commit_hash = logs[-1].commit_hash
 
         return await render_template(
             "repository/commit_log.html",

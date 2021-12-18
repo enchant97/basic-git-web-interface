@@ -20,7 +20,7 @@ endblock %}
                     </div>
                     {% if head %}
                     <a href="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch) }}"
-                        class="bnt" title="Commit Log">{{ macros.feather_img('list') }}</a>
+                        class="bnt" title="Commit Log">{{ macros.feather_img('list') }}<strong>{{ commit_count }}</strong></a>
                     {% endif %}
                 </div>
                 {% include "/shared/includes/tree.html" %}
