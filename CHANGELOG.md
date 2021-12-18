@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2021-12-18
+### Added
+- Commit log count on repo view
+- Relative link conversion for blobs
+- Code highlighting with pygments
+- Raw link when blob view not available
+- Navigation breadcrumb for tree/blob navigation
+
+### Changed
+- Improved text blob rendering
+- Better commit log navigation
+- Split helper methods into separate files
+
+### Fixed
+- Style fixes for tree objects
+
 ## [1.3.0] - 2021-12-10
 ### Added
 - Multi-page commit log (WIP)
