@@ -1,4 +1,4 @@
-quart==0.16.1
+quart==0.16.2
 quart-auth==0.6.0
 git-interface==0.5.1
 web-health-checker==1.1.2
