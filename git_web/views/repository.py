@@ -475,8 +475,7 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
         try:
             logs = tuple(get_logs(repo_path, rev_range,
                         get_config().MAX_COMMIT_LOG_COUNT))
-        except GitException:
-            # TODO replace GitException with specific exception when ambiguous argument is handled
+        except UnknownRevisionException:
             logs = tuple()
 
         last_commit_hash = None

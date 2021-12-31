@@ -15,6 +15,9 @@ endblock %}
             {% endfor -%}
         </select>
     </div>
+    {% if logs|length == 0 %}
+    <h3>No Commits Found</h3>
+    {% else %}
     <table>
         <thead>
             <tr>
@@ -37,5 +40,6 @@ endblock %}
             href="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch, after=last_commit_hash) }}">Next</a>
         {% endif %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}
