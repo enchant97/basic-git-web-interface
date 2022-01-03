@@ -3,4 +3,4 @@ quart-auth==0.6.0
 git-interface==0.5.2
 web-health-checker==1.1.2
 markdown-it-py[linkify]==2.0.0
-pygments==2.10.0
+pygments==2.11.1
