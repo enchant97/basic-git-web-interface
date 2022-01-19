@@ -431,14 +431,15 @@ async def repo_set_description(repo_dir: str, repo_name: str):
     if not repo_path.exists():
         abort(404)
 
-    new_description = (await request.form).get("repo-description")
-    if not new_description:
-        abort(400, "no 'repo-description' given")
-
-    new_description = new_description.strip()
-    set_description(repo_path, new_description)
-
-    return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
+    try:
+        new_description: str = (await request.form)["repo-description"]
+        new_description = new_description.strip()
+        set_description(repo_path, new_description)
+        await flash("new description set", "ok")
+    except KeyError:
+        await flash("missing repo-description field", "error")
+    finally:
+        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/set-name", methods=["POST"])
@@ -448,21 +449,22 @@ async def repo_set_name(repo_dir: str, repo_name: str):
     if not repo_path.exists():
         abort(404)
 
-    new_name = (await request.form).get("repo-name")
+    try:
+        new_name: str = (await request.form)["repo-name"]
+        new_name = new_name.strip().replace(" ", "-")
 
-    if not new_name:
-        abort(400, "missing 'repo-name'")
-    new_name = new_name.strip().replace(" ", "-")
-    if not is_valid_repo_name(new_name):
-        await flash("Repo name contains restricted characters", "error")
+        if not new_name:
+            await flash("Repo name cannot be blank", "error")
+        elif not is_valid_repo_name(new_name):
+            await flash("Repo name contains restricted characters", "error")
+        elif is_name_reserved(new_name):
+            await flash("Repo name is reserved", "error")
+        else:
+            repo_path.rename(safe_combine_full_dir_repo(repo_dir, new_name))
+    except KeyError:
+        await flash("missing 'repo-name' field", "error")
+    finally:
         return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=new_name))
-    if is_name_reserved(new_name):
-        await flash("Repo name is reserved", "error")
-        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=new_name))
-
-    repo_path.rename(safe_combine_full_dir_repo(repo_dir, new_name))
-
-    return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=new_name))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/maintenance")
