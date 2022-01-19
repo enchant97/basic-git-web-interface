@@ -219,6 +219,15 @@ footer {
   gap: 4px;
 }
 
+.button-option {
+  display: flex;
+  padding: 10px;
+}
+
+.button-option :first-child {
+  margin-right: auto;
+}
+
 .repo {
   display: flex;
   gap: 14px;

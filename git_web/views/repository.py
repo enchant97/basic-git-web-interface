@@ -7,11 +7,13 @@ from git_interface.cat_file import get_object_size
 from git_interface.datatypes import Log, TreeContent
 from git_interface.exceptions import (GitException, NoBranchesException,
                                       PathDoesNotExistInRevException,
+                                      UnknownRefException,
                                       UnknownRevisionException)
 from git_interface.log import get_logs
 from git_interface.ls import ls_tree
 from git_interface.rev_list import get_commit_count
 from git_interface.show import show_file
+from git_interface.symbolic_ref import change_active_branch
 from git_interface.utils import (ArchiveTypes, clone_repo, get_archive,
                                  get_description, init_repo, run_maintenance,
                                  set_description)
@@ -365,17 +367,51 @@ async def repo_settings(repo_dir: str, repo_name: str):
         abort(404)
 
     head = None
+    branches = None
     try:
-        head, _ = get_branches(repo_path)
+        head, branches = get_branches(repo_path)
     except NoBranchesException:
         pass
+
+    description = get_description(repo_path)
 
     return await render_template(
         "/repository/settings.html",
         repo_dir=repo_dir,
         repo_name=repo_name,
         head=head,
+        branches=branches,
+        description=description,
     )
+
+
+@blueprint.post("/<repo_dir>/<repo_name>/change-head")
+@login_required
+async def post_repo_change_head(repo_dir: str, repo_name: str):
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
+    if not repo_path.exists():
+        abort(404)
+
+    try:
+        new_head = (await request.form)["repo-head"]
+
+        head, branches = get_branches(repo_path)
+
+        if head in branches:
+            # skip as the head is already set
+            pass
+        elif new_head not in branches:
+            raise UnknownRefException()
+        else:
+            change_active_branch(repo_path, new_head)
+    except KeyError:
+        await flash("missing required fields 'repo-head'", "error")
+    except NoBranchesException:
+        await flash("Repository has no branches yet", "error")
+    except UnknownRefException:
+        await flash("Unknown branch name", "error")
+    finally:
+        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/delete", methods=["GET"])
@@ -402,7 +438,7 @@ async def repo_set_description(repo_dir: str, repo_name: str):
     new_description = new_description.strip()
     set_description(repo_path, new_description)
 
-    return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
+    return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/set-name", methods=["POST"])
@@ -419,14 +455,14 @@ async def repo_set_name(repo_dir: str, repo_name: str):
     new_name = new_name.strip().replace(" ", "-")
     if not is_valid_repo_name(new_name):
         await flash("Repo name contains restricted characters", "error")
-        return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
+        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=new_name))
     if is_name_reserved(new_name):
         await flash("Repo name is reserved", "error")
-        return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
+        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=new_name))
 
     repo_path.rename(safe_combine_full_dir_repo(repo_dir, new_name))
 
-    return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=new_name))
+    return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=new_name))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/maintenance")
@@ -436,7 +472,8 @@ async def repo_maintenance_run(repo_dir: str, repo_name: str):
     if not repo_path.exists():
         abort(404)
     run_maintenance(repo_path)
-    return redirect(url_for(".repo_view", repo_dir=repo_dir, repo_name=repo_name))
+    await flash("maintenance running", "ok")
+    return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/commits/<branch>")

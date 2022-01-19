@@ -6,26 +6,57 @@
 endblock %}
 {% block main %}
 <div class="down">
-    <div class="panel control-bar">
-        <a href="{{ url_for('.repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">{{
-            macros.feather_img('trash-2') }} Delete Repository</a>
+    <section class="panel down">
+        <h1>Repository</h1>
+        <form class="button-option"
+            action="{{ url_for('.repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+            <label for="repo-description">Repository Description</label>
+            <div>
+                <input type="text" name="repo-description" id="repo-description" value="{{ description }}" required>
+                <button type="submit">Set</button>
+            </div>
+        </form>
+        <form class="button-option" action="{{ url_for('.repo_set_name', repo_dir=repo_dir, repo_name=repo_name) }}"
+            method="post">
+            <label for="repo-name">Repository Name</label>
+            <div>
+                <input type="text" name="repo-name" id="repo-name" value="{{ repo_name }}" required>
+                <button type="submit">Rename</button>
+            </div>
+        </form>
+        <form class="button-option"
+            action="{{ url_for('.post_repo_change_head', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+            <label for="repo-head">Repository Head</label>
+            <div>
+                <select name="repo-head" id="repo-head">
+                    {% if head %}
+                    <option value="{{ head }}">*{{ head }}</option>
+                    {% for name in branches %}
+                    <option value="{{ name }}">{{ name }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+                <button type="submit">Change Head</button>
+            </div>
+        </form>
+    </section>
+    <section class="panel down">
+        <h1>Admin</h1>
         {% if head %}
-        <a href="{{ url_for('.repo_maintenance_run', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">{{
-            macros.feather_img('tool') }} Run Git Maintenance</a>
+        <div class="button-option">
+            <p>Runs git maintenance on repository to reduce amount of files</p>
+            <a href="{{ url_for('.repo_maintenance_run', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">{{
+                macros.feather_img('tool') }} Run Git Maintenance</a>
+        </div>
         {% endif %}
-    </div>
-
-    <form class="panel" action="{{ url_for('.repo_set_description', repo_dir=repo_dir, repo_name=repo_name) }}"
-        method="post">
-        <label for="repo-description">Description</label>
-        <input type="text" name=".repo-description" id="repo-description" required>
-        <button type="submit">{{ macros.feather_img('save') }}</button>
-    </form>
-
-    <form class="panel" action="{{ url_for('.repo_set_name', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
-        <label for="repo-name">Name</label>
-        <input type="text" name="repo-name" id="repo-name" required>
-        <button type="submit">{{ macros.feather_img('save') }}</button>
-    </form>
+    </section>
+    <section class="panel down">
+        <h1>Danger</h1>
+        <div class="button-option">
+            <p>Deletes the repository</p>
+            <a href="{{ url_for('.repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">{{
+                macros.feather_img('trash-2') }} Delete Repository</a>
+        </div>
+    </section>
 </div>
 {% endblock %}
