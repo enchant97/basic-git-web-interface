@@ -12,11 +12,11 @@ from git_interface.exceptions import (GitException, NoBranchesException,
 from git_interface.log import get_logs
 from git_interface.ls import ls_tree
 from git_interface.rev_list import get_commit_count
-from git_interface.show import show_file
+from git_interface.show import show_file, show_file_buffered
 from git_interface.symbolic_ref import change_active_branch
-from git_interface.utils import (ArchiveTypes, clone_repo, get_archive,
-                                 get_description, init_repo, run_maintenance,
-                                 set_description)
+from git_interface.utils import (ArchiveTypes, clone_repo,
+                                 get_archive_buffered, get_description,
+                                 init_repo, run_maintenance, set_description)
 from quart import (Blueprint, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart.helpers import flash
@@ -349,7 +349,7 @@ async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_pat
 
         file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
 
-        content = show_file(repo_path, branch, file_path)
+        content = show_file_buffered(repo_path, branch, file_path)
         raw_response = await make_response(content)
         mimetype = guess_mimetype(file_path)
         raw_response.mimetype = mimetype if mimetype is not None else "application/octet-stream"
@@ -548,7 +548,7 @@ async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     if not repo_path.exists():
         abort(404)
 
-    content = get_archive(repo_path, archive_type)
+    content = get_archive_buffered(repo_path, archive_type)
     response = await make_response(content)
     response.mimetype = "application/" + archive_type
     return response
