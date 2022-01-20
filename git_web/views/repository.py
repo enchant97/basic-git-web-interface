@@ -11,6 +11,7 @@ from git_interface.log import get_logs
 from git_interface.rev_list import get_commit_count
 from git_interface.show import show_file, show_file_buffered
 from git_interface.symbolic_ref import change_active_branch
+from git_interface.tag import list_tags
 from git_interface.utils import (ArchiveTypes, clone_repo,
                                  get_archive_buffered, get_description,
                                  init_repo, run_maintenance, set_description)
@@ -433,9 +434,11 @@ async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
 
         head = None
         branches = None
+        tags = None
 
         try:
             head, branches = get_branches(repo_path)
+            tags = list_tags(repo_path)
         except NoBranchesException:
             pass
         else:
@@ -469,6 +472,7 @@ async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
             logs=logs,
             curr_tree_ish=tree_ish,
             branches=branches,
+            tags=tags,
             head=head,
             repo_dir=repo_dir,
             repo_name=repo_name,
