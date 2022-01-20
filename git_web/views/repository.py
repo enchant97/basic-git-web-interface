@@ -1,16 +1,13 @@
 import shutil
 from pathlib import Path
-from typing import Optional
 
 from git_interface.branch import get_branches
 from git_interface.cat_file import get_object_size
-from git_interface.datatypes import Log, TreeContent
 from git_interface.exceptions import (GitException, NoBranchesException,
                                       PathDoesNotExistInRevException,
                                       UnknownRefException,
                                       UnknownRevisionException)
 from git_interface.log import get_logs
-from git_interface.ls import ls_tree
 from git_interface.rev_list import get_commit_count
 from git_interface.show import show_file, show_file_buffered
 from git_interface.symbolic_ref import change_active_branch
@@ -28,7 +25,8 @@ from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
                        is_valid_directory_name, is_valid_repo_name,
                        path_to_tree_components, pathlib_delete_ro_file,
                        render_markdown, safe_combine_full_dir,
-                       safe_combine_full_dir_repo, sort_repo_tree)
+                       safe_combine_full_dir_repo)
+from ..helpers.views import get_repo_view_content
 
 blueprint = Blueprint("repository", __name__)
 
@@ -151,40 +149,10 @@ async def post_import_repo():
     return redirect(url_for(".repo_view", repo_dir=directory, repo_name=name))
 
 
-def get_repo_view_content(
-        branch: str,
-        repo_path: Path,
-        tree_path: Optional[str] = None) -> tuple[str, list[str], tuple[TreeContent], Log]:
-    head = None
-    branches = None
-    root_tree = None
-    recent_log = None
-
-    try:
-        head, branches = get_branches(repo_path)
-    except NoBranchesException:
-        pass
-    else:
-        if branch is None:
-            branch = head
-        elif branch not in branches:
-            if head != branch:
-                raise UnknownBranchName()
-
-        branches = list(branches)
-        branches.append(head)
-
-        root_tree = ls_tree(repo_path, branch, False, False, tree_path)
-        root_tree = sort_repo_tree(root_tree)
-
-        recent_log = next(get_logs(repo_path, branch, 1))
-    return head, branches, root_tree, recent_log
-
-
-@blueprint.route("/<repo_dir>/<repo_name>", defaults={"branch": None})
-@blueprint.route("/<repo_dir>/<repo_name>/tree/<branch>")
+@blueprint.route("/<repo_dir>/<repo_name>", defaults={"tree_ish": None})
+@blueprint.route("/<repo_dir>/<repo_name>/tree/<tree_ish>")
 @login_required
-async def repo_view(repo_dir: str, repo_name: str, branch: str):
+async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
     try:
         repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
@@ -192,31 +160,27 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
 
         ssh_url = create_ssh_uri(repo_path)
 
-        head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path)
-
-        if branch is None:
-            branch = head
-
-        commit_count = get_commit_count(repo_path, branch)
+        repo_content = get_repo_view_content(tree_ish, repo_path)
+        commit_count = get_commit_count(repo_path, repo_content.tree_ish)
 
         # TODO implement more intelligent readme logic
         readme_content = ""
-        if head:
+        if repo_content.head:
             try:
-                content = show_file(repo_path, branch, "README.md").decode()
+                content = show_file(repo_path, repo_content.tree_ish, "README.md").decode()
                 readme_content = render_markdown(
                     content,
                     url_for(
                         ".get_repo_blob_file",
                         repo_dir=repo_dir,
                         repo_name=repo_name,
-                        branch=branch,
+                        tree_ish=repo_content.tree_ish,
                         file_path=""),
                     url_for(
                         ".get_repo_raw_file",
                         repo_dir=repo_dir,
                         repo_name=repo_name,
-                        branch=branch,
+                        tree_ish=repo_content.tree_ish,
                         file_path="")
                 )
             except PathDoesNotExistInRevException:
@@ -229,22 +193,22 @@ async def repo_view(repo_dir: str, repo_name: str, branch: str):
             "repository/repository.html",
             repo_dir=repo_dir,
             repo_name=repo_name,
-            curr_branch=branch,
-            head=head,
-            branches=branches,
+            curr_tree_ish=repo_content.tree_ish,
+            head=repo_content.head,
+            branches=repo_content.branches,
             ssh_url=ssh_url,
             repo_description=get_description(repo_path),
-            root_tree=root_tree,
+            root_tree=repo_content.root_tree,
             readme_content=readme_content,
-            recent_log=recent_log,
+            recent_log=repo_content.recent_log,
             tree_path="",
             commit_count=commit_count,
         )
 
 
-@blueprint.get("/<repo_dir>/<repo_name>/tree/<branch>/<path:tree_path>")
+@blueprint.get("/<repo_dir>/<repo_name>/tree/<tree_ish>/<path:tree_path>")
 @login_required
-async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: str):
+async def get_repo_tree(repo_dir: str, repo_name: str, tree_ish: str, tree_path: str):
     try:
         repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
@@ -253,7 +217,7 @@ async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: s
         if not tree_path.endswith("/"):
             tree_path += "/"
 
-        head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, tree_path)
+        repo_content = get_repo_view_content(tree_ish, repo_path, tree_path)
 
         split_path = path_to_tree_components(Path(tree_path))
 
@@ -264,26 +228,26 @@ async def get_repo_tree(repo_dir: str, repo_name: str, branch: str, tree_path: s
             "repository/tree.html",
             repo_dir=repo_dir,
             repo_name=repo_name,
-            curr_branch=branch,
-            head=head,
-            branches=branches,
-            root_tree=root_tree,
-            recent_log=recent_log,
+            curr_tree_ish=repo_content.tree_ish,
+            head=repo_content.head,
+            branches=repo_content.branches,
+            root_tree=repo_content.root_tree,
+            recent_log=repo_content.recent_log,
             tree_path=tree_path,
             split_path=split_path,
         )
 
 
-@blueprint.get("/<repo_dir>/<repo_name>/blob/<branch>/<path:file_path>")
+@blueprint.get("/<repo_dir>/<repo_name>/blob/<tree_ish>/<path:file_path>")
 @login_required
-async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_path: str):
+async def get_repo_blob_file(repo_dir: str, repo_name: str, tree_ish: str, file_path: str):
     try:
         repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
             abort(404)
 
         file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
-        head, branches, root_tree, recent_log = get_repo_view_content(branch, repo_path, file_path)
+        repo_content = get_repo_view_content(tree_ish, repo_path, file_path)
 
         split_path = path_to_tree_components(Path(file_path))
 
@@ -298,12 +262,12 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
             content_type = "IMAGE"
             content = url_for(
                 ".get_repo_raw_file", repo_dir=repo_dir,
-                repo_name=repo_name, branch=branch,
+                repo_name=repo_name, tree_ish=repo_content.tree_ish,
                 file_path=file_path
             )
         elif mimetype.startswith("text"):
-            if get_object_size(repo_path, branch, file_path) < MAX_BLOB_SIZE:
-                content = show_file(repo_path, branch, file_path).decode()
+            if get_object_size(repo_path, repo_content.tree_ish, file_path) < MAX_BLOB_SIZE:
+                content = show_file(repo_path, repo_content.tree_ish, file_path).decode()
 
                 if mimetype.endswith("markdown"):
                     content_type = "HTML"
@@ -313,7 +277,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
                             ".get_repo_raw_file",
                             repo_dir=repo_dir,
                             repo_name=repo_name,
-                            branch=branch,
+                            tree_ish=repo_content.tree_ish,
                             file_path=""
                         )
                     )
@@ -325,11 +289,11 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
             "repository/blob.html",
                 repo_dir=repo_dir,
                 repo_name=repo_name,
-                curr_branch=branch,
-                head=head,
-                branches=branches,
-                root_tree=root_tree,
-                recent_log=recent_log,
+                curr_tree_ish=repo_content.tree_ish,
+                head=repo_content.head,
+                branches=repo_content.branches,
+                root_tree=repo_content.root_tree,
+                recent_log=repo_content.recent_log,
                 tree_path=file_path,
                 content_type=content_type,
                 content=content,
@@ -339,9 +303,9 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, branch: str, file_pa
         abort(404)
 
 
-@blueprint.get("/<repo_dir>/<repo_name>/raw/<branch>/<path:file_path>")
+@blueprint.get("/<repo_dir>/<repo_name>/raw/<tree_ish>/<path:file_path>")
 @login_required
-async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_path: str):
+async def get_repo_raw_file(repo_dir: str, repo_name: str, tree_ish: str, file_path: str):
     try:
         repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
@@ -349,7 +313,7 @@ async def get_repo_raw_file(repo_dir: str, repo_name: str, branch: str, file_pat
 
         file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
 
-        content = show_file_buffered(repo_path, branch, file_path)
+        content = show_file_buffered(repo_path, tree_ish, file_path)
         raw_response = await make_response(content)
         mimetype = guess_mimetype(file_path)
         raw_response.mimetype = mimetype if mimetype is not None else "application/octet-stream"
@@ -478,9 +442,9 @@ async def repo_maintenance_run(repo_dir: str, repo_name: str):
     return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
 
 
-@blueprint.route("/<repo_dir>/<repo_name>/commits/<branch>")
+@blueprint.route("/<repo_dir>/<repo_name>/commits/<tree_ish>")
 @login_required
-async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
+async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
     try:
         repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
         if not repo_path.exists():
@@ -494,16 +458,13 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
         except NoBranchesException:
             pass
         else:
-            if branch is None:
-                branch = head
-            elif branch not in branches:
-                if head != branch:
-                    abort(404)
+            if tree_ish is None:
+                tree_ish = head
 
             branches = list(branches)
             branches.append(head)
 
-        rev_range = branch
+        rev_range = tree_ish
         after_commit_hash = request.args.get("after")
         if after_commit_hash:
             if is_commit_hash(after_commit_hash):
@@ -525,7 +486,7 @@ async def repo_commit_log(repo_dir: str, repo_name: str, branch: str):
         return await render_template(
             "repository/commit_log.html",
             logs=logs,
-            curr_branch=branch,
+            curr_tree_ish=tree_ish,
             branches=branches,
             head=head,
             repo_dir=repo_dir,

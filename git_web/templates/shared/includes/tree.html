@@ -11,12 +11,12 @@
             {% if obj.type_.value == "tree" %}
             <td>{{ macros.feather_img('folder') }}</td>
             <td><a
-                    href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch, tree_path=obj.file) }}">{{
+                    href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, tree_path=obj.file) }}">{{
                     obj.file.relative_to(tree_path) }}</a></td>
             {% else %}
             <td>{{ macros.feather_img('file') }}</td>
             <td><a
-                    href="{{ url_for('.get_repo_blob_file', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch, file_path=obj.file) }}">{{
+                    href="{{ url_for('.get_repo_blob_file', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, file_path=obj.file) }}">{{
                     obj.file.relative_to(tree_path) }}</a></td>
             {% endif %}
         </tr>

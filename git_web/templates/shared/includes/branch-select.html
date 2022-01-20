@@ -1,8 +1,9 @@
 <select onchange="select_navigate_to(this)" title="Branch">
     {% if head %}
+    <option value=""></option>
     {% for name in branches %}
-    <option value="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, branch=name) }}" {% if
-        name==curr_branch %} selected {% endif %}>{% if name==head %}*{% endif %}{{
+    <option value="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, tree_ish=name) }}" {% if
+        name==curr_tree_ish %} selected {% endif %}>{% if name==head %}*{% endif %}{{
         name }}</option>
     {% endfor %}
     {% endif %}

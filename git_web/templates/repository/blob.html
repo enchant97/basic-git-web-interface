@@ -15,7 +15,7 @@ endblock %}
             <span>{{ component.name }}</span>
             {% else %}
             <a
-                href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch, tree_path=component.full_path) }}">{{
+                href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, tree_path=component.full_path) }}">{{
                 component.name }}</a>
             {% endif %}
             /
@@ -32,7 +32,7 @@ endblock %}
         {% else %}
         <span style="text-align: center;">
             <p>Preview not available for this file type, preview not available</p>
-            <a href="{{ url_for('.get_repo_raw_file', repo_dir=repo_dir, repo_name=repo_name, branch=curr_branch, file_path=tree_path) }}">View Raw</a>
+            <a href="{{ url_for('.get_repo_raw_file', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, file_path=tree_path) }}">View Raw</a>
 
         </span>
         {% endif %}
