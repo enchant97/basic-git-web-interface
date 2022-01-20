@@ -4,6 +4,13 @@ function select_navigate_to(element) {
     document.location.assign(element.value);
 }
 
+async function copy_to_clipboard(text) {
+    let result = await navigator.permissions.query({ name: "clipboard-write" });
+    if (result.state == "granted" || result.state == "prompt") {
+        await navigator.clipboard.writeText(text);
+    }
+}
+
 // Setup site theme
 ThemeChanger.theme_meta.light[1] = [
     ["--font-dark", "black"],
