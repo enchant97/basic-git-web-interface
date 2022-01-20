@@ -3,3 +3,27 @@
     <use href="{{ url_for('static', filename='feather-sprite.svg') }}#{{ icon_name }}"></use>
 </svg>
 {% endmacro -%}
+
+{% macro tree_ish_select(route_name, id, title, head, curr_tree_ish, branches, tags) -%}
+<select onchange="select_navigate_to(this)" id="{{ id }}" title="{{ title }}">
+    {% if head %}
+    {% if curr_tree_ish not in branches and curr_tree_ish not in tags %}
+    <option value="{{ url_for(route_name, repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, **kwargs) }}" selected>
+        {{ curr_tree_ish }}</option>
+    {% endif %}
+    <optgroup label="Branches">
+        {% for name in branches %}
+        <option value="{{ url_for(route_name, repo_dir=repo_dir, repo_name=repo_name, tree_ish=name, **kwargs) }}" {% if
+            name==curr_tree_ish %} selected {% endif %}>{% if name==head %}*{% endif %}{{
+            name }}</option>
+        {% endfor %}
+    </optgroup>
+    <optgroup label="Tags">
+        {% for name in tags %}
+        <option value="{{ url_for(route_name, repo_dir=repo_dir, repo_name=repo_name, tree_ish=name, **kwargs) }}" {% if
+            name==curr_tree_ish %} selected {% endif %}>{{ name }}</option>
+        {% endfor %}
+    </optgroup>
+    {% endif %}
+</select>
+{% endmacro -%}

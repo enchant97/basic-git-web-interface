@@ -1,3 +1,4 @@
+{% from "/shared/macros.html" import tree_ish_select with context %}
 {% extends "/shared/base.html" %}
 {% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
 {% block title2 %}Repository{% endblock %}
@@ -8,7 +9,7 @@ endblock %}
 <div class="repo">
     <div class="main down">
         <div class="control-bar">
-            {% include "/shared/includes/branch-select.html" %}
+            {{ tree_ish_select('.repo_view', 'tree-ish-select', "Branch/Tree", head, curr_tree_ish, branches, tags) }}
         </div>
         {% if root_tree %}
         <div class="down">

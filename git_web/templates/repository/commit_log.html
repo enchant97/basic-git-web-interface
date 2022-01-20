@@ -1,3 +1,4 @@
+{% from "/shared/macros.html" import tree_ish_select with context %}
 {% extends "/shared/base.html" %}
 {% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
 {% block title2 %}Commits{% endblock %}
@@ -7,14 +8,7 @@ endblock %}
 {% block main %}
 <div class="down">
     <div class="control-bar">
-        <select onchange="select_navigate_to(this)" title="Branch">
-            <option value=""></option>
-            {% for name in branches -%}
-            <option value="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, tree_ish=name) }}" {% if
-                name==curr_tree_ish %} selected {% endif %}>{% if name==head %}*{% endif %}{{ name }}
-            </option>
-            {% endfor -%}
-        </select>
+        {{ tree_ish_select('.repo_commit_log', 'tree-ish-select', "Branch/Tree", head, curr_tree_ish, branches, tags) }}
     </div>
     {% if logs|length == 0 %}
     <h3>No Commits Found</h3>

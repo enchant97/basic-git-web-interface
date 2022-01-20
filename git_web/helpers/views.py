@@ -9,6 +9,7 @@ from git_interface.exceptions import (NoBranchesException,
 from git_interface.log import get_logs
 from git_interface.ls import ls_tree
 from git_interface.show import show_file
+from git_interface.tag import list_tags
 from quart import url_for
 
 from .calculations import sort_repo_tree
@@ -20,6 +21,7 @@ class RepoContent:
     tree_ish: str
     head: str
     branches: list[str]
+    tags: list[str]
     root_tree: tuple[TreeContent]
     recent_log: Log
 
@@ -30,11 +32,13 @@ def get_repo_view_content(
         tree_path: Optional[str] = None) -> RepoContent:
     head = None
     branches = None
+    tags = None
     root_tree = None
     recent_log = None
 
     try:
         head, branches = get_branches(repo_path)
+        tags = list_tags(repo_path)
     except NoBranchesException:
         pass
     else:
@@ -48,7 +52,7 @@ def get_repo_view_content(
         root_tree = sort_repo_tree(root_tree)
 
         recent_log = next(get_logs(repo_path, tree_ish, 1))
-    return RepoContent(tree_ish, head, branches, root_tree, recent_log)
+    return RepoContent(tree_ish, head, branches, tags, root_tree, recent_log)
 
 
 def try_get_readme(repo_path: Path, repo_dir: str, repo_name: str, repo_content: RepoContent) -> str:
