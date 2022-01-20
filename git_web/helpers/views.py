@@ -4,11 +4,15 @@ from typing import Optional
 
 from git_interface.branch import get_branches
 from git_interface.datatypes import Log, TreeContent
-from git_interface.exceptions import NoBranchesException
+from git_interface.exceptions import (NoBranchesException,
+                                      PathDoesNotExistInRevException)
 from git_interface.log import get_logs
 from git_interface.ls import ls_tree
+from git_interface.show import show_file
+from quart import url_for
 
 from .calculations import sort_repo_tree
+from .content_preview import render_markdown
 
 
 @dataclass
@@ -45,3 +49,30 @@ def get_repo_view_content(
 
         recent_log = next(get_logs(repo_path, tree_ish, 1))
     return RepoContent(tree_ish, head, branches, root_tree, recent_log)
+
+
+def try_get_readme(repo_path: Path, repo_dir: str, repo_name: str, repo_content: RepoContent) -> str:
+    readme_content = ""
+    # TODO implement more intelligent readme logic
+    if repo_content.head:
+        try:
+            content = show_file(repo_path, repo_content.tree_ish, "README.md").decode()
+            readme_content = render_markdown(
+                content,
+                url_for(
+                    ".get_repo_blob_file",
+                    repo_dir=repo_dir,
+                    repo_name=repo_name,
+                    tree_ish=repo_content.tree_ish,
+                    file_path=""),
+                url_for(
+                    ".get_repo_raw_file",
+                    repo_dir=repo_dir,
+                    repo_name=repo_name,
+                    tree_ish=repo_content.tree_ish,
+                    file_path="")
+            )
+        except PathDoesNotExistInRevException:
+            # no readme recognised
+            pass
+    return readme_content

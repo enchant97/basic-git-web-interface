@@ -26,7 +26,7 @@ from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
                        path_to_tree_components, pathlib_delete_ro_file,
                        render_markdown, safe_combine_full_dir,
                        safe_combine_full_dir_repo)
-from ..helpers.views import get_repo_view_content
+from ..helpers.views import get_repo_view_content, try_get_readme
 
 blueprint = Blueprint("repository", __name__)
 
@@ -163,29 +163,7 @@ async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
         repo_content = get_repo_view_content(tree_ish, repo_path)
         commit_count = get_commit_count(repo_path, repo_content.tree_ish)
 
-        # TODO implement more intelligent readme logic
-        readme_content = ""
-        if repo_content.head:
-            try:
-                content = show_file(repo_path, repo_content.tree_ish, "README.md").decode()
-                readme_content = render_markdown(
-                    content,
-                    url_for(
-                        ".get_repo_blob_file",
-                        repo_dir=repo_dir,
-                        repo_name=repo_name,
-                        tree_ish=repo_content.tree_ish,
-                        file_path=""),
-                    url_for(
-                        ".get_repo_raw_file",
-                        repo_dir=repo_dir,
-                        repo_name=repo_name,
-                        tree_ish=repo_content.tree_ish,
-                        file_path="")
-                )
-            except PathDoesNotExistInRevException:
-                # no readme recognised
-                pass
+        readme_content = try_get_readme(repo_path, repo_dir, repo_name, repo_content)
     except (ValueError, UnknownBranchName):
         abort(404)
     else:
