@@ -26,7 +26,7 @@ class RepoContent:
     recent_log: Log
 
 
-def get_repo_view_content(
+async def get_repo_view_content(
         tree_ish: str,
         repo_path: Path,
         tree_path: Optional[str] = None) -> RepoContent:
@@ -37,8 +37,8 @@ def get_repo_view_content(
     recent_log = None
 
     try:
-        head, branches = get_branches(repo_path)
-        tags = list_tags(repo_path)
+        head, branches = await get_branches(repo_path)
+        tags = await list_tags(repo_path)
     except NoBranchesException:
         pass
     else:
@@ -48,19 +48,19 @@ def get_repo_view_content(
         branches = list(branches)
         branches.append(head)
 
-        root_tree = ls_tree(repo_path, tree_ish, False, False, tree_path)
+        root_tree = await ls_tree(repo_path, tree_ish, False, False, tree_path)
         root_tree = sort_repo_tree(root_tree)
 
-        recent_log = next(get_logs(repo_path, tree_ish, 1))
+        recent_log = next(await get_logs(repo_path, tree_ish, 1))
     return RepoContent(tree_ish, head, branches, tags, root_tree, recent_log)
 
 
-def try_get_readme(repo_path: Path, repo_dir: str, repo_name: str, repo_content: RepoContent) -> str:
+async def try_get_readme(repo_path: Path, repo_dir: str, repo_name: str, repo_content: RepoContent) -> str:
     readme_content = ""
     # TODO implement more intelligent readme logic
     if repo_content.head:
         try:
-            content = show_file(repo_path, repo_content.tree_ish, "README.md").decode()
+            content = (await show_file(repo_path, repo_content.tree_ish, "README.md")).decode()
             readme_content = render_markdown(
                 content,
                 url_for(

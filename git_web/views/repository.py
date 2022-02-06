@@ -83,14 +83,14 @@ async def post_new_repo():
     except ValueError:
         abort(400, "invalid values in form given")
 
-    init_repo(
+    await init_repo(
         full_path,
         name,
         True,
         get_config().DEFAULT_BRANCH
     )
     if description is not None:
-        set_description(full_repo_path, description)
+        await set_description(full_repo_path, description)
     return redirect(url_for(".repo_view", repo_dir=directory, repo_name=name))
 
 
@@ -139,7 +139,7 @@ async def post_import_repo():
             await flash("Invalid repo url given", "error")
             return redirect(url_for(".get_import_repo"))
 
-        clone_repo(full_repo_path, url, True)
+        await clone_repo(full_repo_path, url, True)
     except KeyError:
         abort(400, "missing required values")
     except ValueError:
@@ -161,10 +161,10 @@ async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
 
         ssh_url = create_ssh_uri(repo_path)
 
-        repo_content = get_repo_view_content(tree_ish, repo_path)
-        commit_count = get_commit_count(repo_path, repo_content.tree_ish)
+        repo_content = await get_repo_view_content(tree_ish, repo_path)
+        commit_count = await get_commit_count(repo_path, repo_content.tree_ish)
 
-        readme_content = try_get_readme(repo_path, repo_dir, repo_name, repo_content)
+        readme_content = await try_get_readme(repo_path, repo_dir, repo_name, repo_content)
     except (ValueError, UnknownBranchName):
         abort(404)
     else:
@@ -177,7 +177,7 @@ async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
             branches=repo_content.branches,
             tags=repo_content.tags,
             ssh_url=ssh_url,
-            repo_description=get_description(repo_path),
+            repo_description=await get_description(repo_path),
             root_tree=repo_content.root_tree,
             readme_content=readme_content,
             recent_log=repo_content.recent_log,
@@ -197,7 +197,7 @@ async def get_repo_tree(repo_dir: str, repo_name: str, tree_ish: str, tree_path:
         if not tree_path.endswith("/"):
             tree_path += "/"
 
-        repo_content = get_repo_view_content(tree_ish, repo_path, tree_path)
+        repo_content = await get_repo_view_content(tree_ish, repo_path, tree_path)
 
         split_path = path_to_tree_components(Path(tree_path))
 
@@ -228,7 +228,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, tree_ish: str, file_
             abort(404)
 
         file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
-        repo_content = get_repo_view_content(tree_ish, repo_path, file_path)
+        repo_content = await get_repo_view_content(tree_ish, repo_path, file_path)
 
         split_path = path_to_tree_components(Path(file_path))
 
@@ -247,8 +247,8 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, tree_ish: str, file_
                 file_path=file_path
             )
         elif mimetype.startswith("text"):
-            if get_object_size(repo_path, repo_content.tree_ish, file_path) < MAX_BLOB_SIZE:
-                content = show_file(repo_path, repo_content.tree_ish, file_path).decode()
+            if await get_object_size(repo_path, repo_content.tree_ish, file_path) < MAX_BLOB_SIZE:
+                content = (await show_file(repo_path, repo_content.tree_ish, file_path)).decode()
 
                 if mimetype.endswith("markdown"):
                     content_type = "HTML"
@@ -315,11 +315,11 @@ async def repo_settings(repo_dir: str, repo_name: str):
     head = None
     branches = None
     try:
-        head, branches = get_branches(repo_path)
+        head, branches = await get_branches(repo_path)
     except NoBranchesException:
         pass
 
-    description = get_description(repo_path)
+    description = await get_description(repo_path)
 
     return await render_template(
         "/repository/settings.html",
@@ -341,7 +341,7 @@ async def post_repo_change_head(repo_dir: str, repo_name: str):
     try:
         new_head = (await request.form)["repo-head"]
 
-        head, branches = get_branches(repo_path)
+        head, branches = await get_branches(repo_path)
 
         if head in branches:
             # skip as the head is already set
@@ -349,7 +349,7 @@ async def post_repo_change_head(repo_dir: str, repo_name: str):
         elif new_head not in branches:
             raise UnknownRefException()
         else:
-            change_active_branch(repo_path, new_head)
+            await change_active_branch(repo_path, new_head)
     except KeyError:
         await flash("missing required fields 'repo-head'", "error")
     except NoBranchesException:
@@ -380,7 +380,7 @@ async def repo_set_description(repo_dir: str, repo_name: str):
     try:
         new_description: str = (await request.form)["repo-description"]
         new_description = new_description.strip()
-        set_description(repo_path, new_description)
+        await set_description(repo_path, new_description)
         await flash("new description set", "ok")
     except KeyError:
         await flash("missing repo-description field", "error")
@@ -419,7 +419,7 @@ async def repo_maintenance_run(repo_dir: str, repo_name: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
         abort(404)
-    run_maintenance(repo_path)
+    await run_maintenance(repo_path)
     await flash("maintenance running", "ok")
     return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
 
@@ -437,8 +437,8 @@ async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
         tags = None
 
         try:
-            head, branches = get_branches(repo_path)
-            tags = list_tags(repo_path)
+            head, branches = await get_branches(repo_path)
+            tags = await list_tags(repo_path)
         except NoBranchesException:
             pass
         else:
@@ -457,7 +457,7 @@ async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
                 abort(400, "Invalid after param argument")
 
         try:
-            logs = tuple(get_logs(repo_path, rev_range,
+            logs = tuple(await get_logs(repo_path, rev_range,
                         get_config().MAX_COMMIT_LOG_COUNT))
         except UnknownRevisionException:
             logs = tuple()
