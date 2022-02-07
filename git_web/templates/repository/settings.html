@@ -41,6 +41,32 @@ endblock %}
         </form>
     </section>
     <section class="panel down">
+        <h1>Branch</h1>
+        <form class="button-option" action="{{ url_for('.repo_branch_new', repo_dir=repo_dir, repo_name=repo_name) }}"
+            method="post">
+            <label for="branch-name-new">New Branch</label>
+            <div>
+                <input type="text" name="branch-name-new" id="branch-name-new" required>
+                <button type="submit">Create</button>
+            </div>
+        </form>
+        <form class="button-option"
+            action="{{ url_for('.repo_branch_delete', repo_dir=repo_dir, repo_name=repo_name) }}" method="post">
+            <label for="branch-name-delete">Delete Branch</label>
+            <div>
+                <select name="branch-name-delete" id="branch-name-delete" required>
+                    {% if head %}
+                    <option>**  Select A Branch **</option>
+                    {% for name in branches %}
+                    <option value="{{ name }}">{{ name }}</option>
+                    {% endfor %}
+                    {% endif %}
+                </select>
+                <button type="submit">Delete</button>
+            </div>
+        </form>
+    </section>
+    <section class="panel down">
         <h1>Admin</h1>
         {% if head %}
         <div class="button-option">

@@ -1,9 +1,10 @@
 import shutil
 from pathlib import Path
 
-from git_interface.branch import get_branches
+from git_interface.branch import delete_branch, get_branches, new_branch
 from git_interface.cat_file import get_object_size
-from git_interface.exceptions import (GitException, NoBranchesException,
+from git_interface.exceptions import (AlreadyExistsException, GitException,
+                                      NoBranchesException,
                                       PathDoesNotExistInRevException,
                                       UnknownRefException,
                                       UnknownRevisionException)
@@ -356,6 +357,53 @@ async def post_repo_change_head(repo_dir: str, repo_name: str):
         await flash("Repository has no branches yet", "error")
     except UnknownRefException:
         await flash("Unknown branch name", "error")
+    finally:
+        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
+
+
+@blueprint.post("/<repo_dir>/<repo_name>/new-branch")
+@login_required
+async def repo_branch_new(repo_dir: str, repo_name: str):
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
+    if not repo_path.exists():
+        abort(404)
+
+    try:
+        branch_name = (await request.form)["branch-name-new"]
+        branch_name = branch_name.strip().replace(" ", "-")
+
+        if not is_valid_repo_name(branch_name):
+            await flash("Branch name not valid", "error")
+        else:
+            await new_branch(repo_path, branch_name)
+            await flash(f"Branch '{branch_name}' created", "ok")
+    except AlreadyExistsException:
+        await flash(f"Branch '{branch_name}' already exists", "error")
+    except KeyError:
+        abort(400, "missing required values")
+    finally:
+        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
+
+
+@blueprint.post("/<repo_dir>/<repo_name>/delete-branch")
+@login_required
+async def repo_branch_delete(repo_dir: str, repo_name: str):
+    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
+    if not repo_path.exists():
+        abort(404)
+
+    try:
+        branch_name = (await request.form)["branch-name-delete"]
+
+        if not is_valid_repo_name(branch_name):
+            await flash("Branch name not valid", "error")
+        else:
+            await delete_branch(repo_path, branch_name)
+            await flash(f"branch {branch_name} deleted", "ok")
+    except (GitException, NoBranchesException):
+        await flash("Cannot delete provided branch name", "error")
+    except KeyError:
+        abort(400, "missing required values")
     finally:
         return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
 
