@@ -7,7 +7,7 @@ from web_health_checker.contrib import quart as health_check
 from . import __version__
 from .helpers import get_config
 from .helpers.known_mimetypes import register_extra_types
-from .views import auth, directory, home, repository
+from .views import auth, directory, git_http, home, repository
 
 app = Quart(__name__)
 auth_manager = AuthManager()
@@ -40,6 +40,7 @@ def create_app() -> Quart:
     app.register_blueprint(auth.blueprint, url_prefix="/auth")
     app.register_blueprint(directory.blueprint)
     app.register_blueprint(repository.blueprint)
+    app.register_blueprint(git_http.blueprint)
     # register plugins
     auth_manager.init_app(app)
     # try to setup app folders
