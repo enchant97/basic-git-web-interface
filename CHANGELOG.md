@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.5.0] - 2022-02-08
+### Added
+- Add message when there are no commits
+- Redesign repository settings page
+- Redesign branch select by adding tag selection and tree-ish
+- Redesign commit log page
+  - Add copy to clipboard functionality
+  - Truncate commit hash & name
+- Branch creation and deletion
+- Allow for repository HEAD to be changed
+
+### Changed
+- Style improvements
+- Updated pip requirements
+- Use streamed responses for blob access
+- Use new async version of git-interface
+- Allow for tree-ish for commit log and tree navigation
+
+### Fixed
+- Implement fixed exception handling
+
 ## [1.4.0] - 2021-12-18
 ### Added
 - Commit log count on repo view
