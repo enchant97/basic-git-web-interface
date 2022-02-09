@@ -1,27 +1,29 @@
 import re
 
 from quart import Blueprint, abort, request, send_file
+from quart_auth import basic_auth_required as git_auth_required
 
 from ..helpers import safe_combine_full_dir_repo
 
 blueprint = Blueprint("git_http", __name__)
 
-# TODO add authentication
-
 
 @blueprint.post("/<repo_dir>/<repo_name>.git/git-upload-pack")
+@git_auth_required()
 async def post_upload_pack():
     # TODO implement
     abort(501)
 
 
 @blueprint.post("/<repo_dir>/<repo_name>.git/git-receive-pack")
+@git_auth_required()
 async def post_receive_pack():
     # TODO implement
     abort(501)
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/info/refs")
+@git_auth_required()
 async def get_info_refs(repo_dir: str, repo_name: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
@@ -37,6 +39,7 @@ async def get_info_refs(repo_dir: str, repo_name: str):
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/HEAD")
+@git_auth_required()
 async def get_head(repo_dir: str, repo_name: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     head_path = repo_path / "HEAD"
@@ -47,6 +50,7 @@ async def get_head(repo_dir: str, repo_name: str):
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/objects/info/alternates")
+@git_auth_required()
 async def get_obj_info_alt(repo_dir: str, repo_name: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     file_path = repo_path / "objects/info/alternates"
@@ -57,6 +61,7 @@ async def get_obj_info_alt(repo_dir: str, repo_name: str):
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/objects/info/http-alternates")
+@git_auth_required()
 async def get_obj_info_http_alt(repo_dir: str, repo_name: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     file_path = repo_path / "objects/info/http-alternates"
@@ -67,6 +72,7 @@ async def get_obj_info_http_alt(repo_dir: str, repo_name: str):
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/objects/info/packs")
+@git_auth_required()
 async def get_obj_info_packs(repo_dir: str, repo_name: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     file_path = repo_path / "objects/info/packs"
@@ -77,6 +83,7 @@ async def get_obj_info_packs(repo_dir: str, repo_name: str):
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/objects/info/<file_name>")
+@git_auth_required()
 async def get_obj_info_file_files(repo_dir: str, repo_name: str, file_name: str):
     if not re.match(r"[^\/]+", file_name):
         abort(404)
@@ -89,6 +96,7 @@ async def get_obj_info_file_files(repo_dir: str, repo_name: str, file_name: str)
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/objects/<obj_hash_1>/<obj_hash_2>")
+@git_auth_required()
 async def get_loose_obj(repo_dir: str, repo_name: str, obj_hash_1, obj_hash_2: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     if not repo_path.exists():
@@ -108,6 +116,7 @@ async def get_loose_obj(repo_dir: str, repo_name: str, obj_hash_1, obj_hash_2: s
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/objects/pack/pack-<obj_hash>.pack")
+@git_auth_required()
 async def get_obj_pack(repo_dir: str, repo_name: str, obj_hash: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     obj_hash_match = re.match(r"[0-9a-f]{40}", obj_hash)
@@ -121,6 +130,7 @@ async def get_obj_pack(repo_dir: str, repo_name: str, obj_hash: str):
     return await send_file(file_path, "application/x-git-packed-objects")
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/objects/pack/pack-<obj_hash>.idx")
+@git_auth_required()
 async def get_obj_pack_idx(repo_dir: str, repo_name: str, obj_hash: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
     obj_hash_match = re.match(r"[0-9a-f]{40}", obj_hash)

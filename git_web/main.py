@@ -31,6 +31,8 @@ def create_app() -> Quart:
     app.secret_key = config.SECRET_KEY
     # this is allowing us to run through a proxy
     app.config["QUART_AUTH_COOKIE_SECURE"] = False
+    app.config["QUART_AUTH_BASIC_USERNAME"] = "git"
+    app.config["QUART_AUTH_BASIC_PASSWORD"] = get_config().LOGIN_PASSWORD
     app.config["VERSION"] = __version__
     app.config["SHOW_SSH_PUB"] = True if get_config().SSH_PUB_KEY_PATH else False
     app.config["SHOW_SSH_AUTHORISED"] = True if get_config().SSH_AUTH_KEYS_PATH else False
