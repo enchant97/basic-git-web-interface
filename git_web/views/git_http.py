@@ -96,7 +96,8 @@ async def post_pack(repo_dir: str, repo_name: str, pack_type: str):
         await request_body_uncompressed(),
     ))
     response.content_type = f"application/x-git-{pack_type}-pack-result"
-    # TODO add no-cache header
+    response.headers.add_header("Cache-Control", "no-store")
+    response.headers.add_header("Expires", "0")
 
     return response
 
@@ -120,6 +121,7 @@ async def get_info_refs(repo_dir: str, repo_name: str):
         True
     ))
     response.content_type = f"application/x-{pack_type}-advertisement"
-    # TODO add no-cache header
+    response.headers.add_header("Cache-Control", "no-store")
+    response.headers.add_header("Expires", "0")
 
     return response
