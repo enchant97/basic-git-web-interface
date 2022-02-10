@@ -6,6 +6,7 @@ from collections.abc import AsyncGenerator
 from functools import wraps
 from pathlib import Path
 
+from async_timeout import timeout
 from git_interface.exceptions import BufferedProcessError
 from quart import Blueprint, abort, current_app, make_response, request
 from quart_auth import basic_auth_required as git_auth_required
@@ -28,7 +29,7 @@ def require_http_git_enabled(func):
 async def process_pack_exchange(
         repo_path: Path,
         pack_type: str,
-        client_data: bytes,
+        client_data_stream: AsyncGenerator[bytes, None],
         advertise_refs: bool = False) -> AsyncGenerator[bytes, None]:
     """
     Communicate with the git commands: upload-pack and receive-pack
@@ -56,7 +57,8 @@ async def process_pack_exchange(
         stderr=asyncio.subprocess.PIPE,
     )
 
-    process.stdin.write(client_data)
+    async for chunk in client_data_stream:
+        process.stdin.write(chunk)
     process.stdin.write_eof()
 
     if advertisement:
@@ -70,24 +72,6 @@ async def process_pack_exchange(
         raise BufferedProcessError(await process.stderr.read(), return_code)
 
 
-async def request_body_uncompressed() -> bytes:
-    """
-    Ensure that the provided body is not compressed with gzip
-
-        :return: The body
-    """
-    # TODO use a AsyncGenerator instead
-    # Ref Docs: https://pgjones.gitlab.io/quart/how_to_guides/request_body.html#advanced-usage
-
-    raw_data: bytes = await request.get_data(
-        cache=False,
-        as_text=False,
-        parse_form_data=False
-    )
-
-    return raw_data
-
-
 @blueprint.post("/<repo_dir>/<repo_name>.git/git-<pack_type>-pack")
 @require_http_git_enabled
 @git_auth_required()
@@ -98,11 +82,12 @@ async def post_pack(repo_dir: str, repo_name: str, pack_type: str):
     if not repo_path.exists():
         abort(404)
 
-    response = await make_response(process_pack_exchange(
-        repo_path,
-        f"git-{pack_type}-pack",
-        await request_body_uncompressed(),
-    ))
+    async with timeout(current_app.config["BODY_TIMEOUT"]):
+        response = await make_response(process_pack_exchange(
+            repo_path,
+            f"git-{pack_type}-pack",
+            request.body,
+        ))
     response.content_type = f"application/x-git-{pack_type}-pack-result"
     response.headers.add_header("Cache-Control", "no-store")
     response.headers.add_header("Expires", "0")
@@ -123,12 +108,13 @@ async def get_info_refs(repo_dir: str, repo_name: str):
     if pack_type not in ("git-upload-pack", "git-receive-pack"):
         abort(404)
 
-    response = await make_response(process_pack_exchange(
-        repo_path,
-        pack_type,
-        await request_body_uncompressed(),
-        True
-    ))
+    async with timeout(current_app.config["BODY_TIMEOUT"]):
+        response = await make_response(process_pack_exchange(
+            repo_path,
+            pack_type,
+            request.body,
+            True
+        ))
     response.content_type = f"application/x-{pack_type}-advertisement"
     response.headers.add_header("Cache-Control", "no-store")
     response.headers.add_header("Expires", "0")
