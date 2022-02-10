@@ -14,6 +14,7 @@ class Config(BaseSettings):
     """
     REPOS_PATH: Path
     REPOS_SSH_BASE: str
+    REPOS_HTTP_BASE: str
     LOGIN_PASSWORD: str
     SECRET_KEY: str
     DEFAULT_BRANCH: Optional[str] = "main"

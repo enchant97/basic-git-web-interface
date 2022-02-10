@@ -104,6 +104,17 @@ def create_ssh_uri(repo_path: Path) -> str:
         str(repo_path.relative_to(get_config().REPOS_PATH)).replace("\\", "/")
 
 
+def create_git_http_uri(repo_path: Path) -> str:
+    """
+    Create a http uri for a given repository path
+
+        :param repo_path: The repository path
+        :return: the http uri
+    """
+    return get_config().REPOS_HTTP_BASE.removesuffix("/") + "/" +\
+        str(repo_path.relative_to(get_config().REPOS_PATH)).replace("\\", "/")
+
+
 def pathlib_delete_ro_file(action, name, exc):  # pragma: no cover
     os.chmod(name, stat.S_IWRITE)
     os.remove(name)

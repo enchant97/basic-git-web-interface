@@ -92,6 +92,12 @@ async def request_body_uncompressed() -> bytes:
     return raw_data
 
 
+@blueprint.get("/<repo_dir>/<repo_name>.git")
+async def get_repo_url():
+    # this is just a fake route for url_for to use
+    abort(404)
+
+
 @blueprint.post("/<repo_dir>/<repo_name>.git/git-<pack_type>-pack")
 @require_http_git_enabled
 @git_auth_required()

@@ -28,6 +28,7 @@ from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
                        path_to_tree_components, pathlib_delete_ro_file,
                        render_markdown, safe_combine_full_dir,
                        safe_combine_full_dir_repo)
+from ..helpers.calculations import create_git_http_uri
 from ..helpers.views import get_repo_view_content, try_get_readme
 
 blueprint = Blueprint("repository", __name__)
@@ -161,6 +162,7 @@ async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
             abort(404)
 
         ssh_url = create_ssh_uri(repo_path)
+        http_url = create_git_http_uri(repo_path)
 
         repo_content = await get_repo_view_content(tree_ish, repo_path)
         commit_count = await get_commit_count(repo_path, repo_content.tree_ish)
@@ -178,6 +180,7 @@ async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
             branches=repo_content.branches,
             tags=repo_content.tags,
             ssh_url=ssh_url,
+            http_url=http_url,
             repo_description=await get_description(repo_path),
             root_tree=repo_content.root_tree,
             readme_content=readme_content,

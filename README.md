@@ -31,21 +31,26 @@ It has been designed to run through docker and it is recommended to run through 
 ## Config
 All configs are handled through environment variables.
 
-| Name                 | Description                        | Default     |
-|:---------------------|:-----------------------------------|:------------|
-| REPOS_PATH           | Where the repos are stored         | /data/repos |
-| REPOS_SSH_BASE       | SSH username and domain            |             |
-| LOGIN_PASSWORD       | Password to login with             |             |
-| SECRET_KEY           | Server secret key                  |             |
-| DISALLOWED_DIRS      | Any directory names to hide        | -           |
-| DEFAULT_BRANCH       | The default branch name            | main        |
-| MAX_COMMIT_LOG_COUNT | Max number of commits to show      | 20          |
-| SSH_PUB_KEY_PATH     | Path to public ssh key             | -           |
-| SSH_AUTH_KEYS_PATH   | Path to authorised ssh keys        | -           |
-| HTTP_GIT_ENABLED     | Whether to allow git http requests | 1           |
-| WORKERS              | Number of Hypercorn workers        | 1           |
+| Name                 | Description                               | Default     |
+|:---------------------|:------------------------------------------|:------------|
+| REPOS_PATH           | Where the repos are stored                | /data/repos |
+| REPOS_SSH_BASE       | SSH username and domain                   |             |
+| REPOS_HTTP_BASE      | The url for accessing for using git http  |             |
+| LOGIN_PASSWORD       | Password to login with                    |             |
+| SECRET_KEY           | Server secret key                         |             |
+| DISALLOWED_DIRS      | Any directory names to hide               | -           |
+| DEFAULT_BRANCH       | The default branch name                   | main        |
+| MAX_COMMIT_LOG_COUNT | Max number of commits to show             | 20          |
+| SSH_PUB_KEY_PATH     | Path to public ssh key                    | -           |
+| SSH_AUTH_KEYS_PATH   | Path to authorised ssh keys               | -           |
+| HTTP_GIT_ENABLED     | Whether to allow git http requests        | 1           |
+| WORKERS              | Number of Hypercorn workers               | 1           |
 
 > Default values indicated with '-' are not required
+
+> REPOS_SSH_BASE should look like this: `git@mydomain.lan`
+
+> REPOS_HTTP_BASE should look like this: `https://git.mydomain.lan`
 
 > DISALLOWED_DIRS must be a JSON array be e.g. DISALLOWED_DIRS=[".ssh", "my-secrets"]
 
