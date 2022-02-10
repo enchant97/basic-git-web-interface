@@ -2,13 +2,12 @@
 Methods for supporting git's 'Smart HTTP' protocol
 """
 import asyncio
-import gzip
 from collections.abc import AsyncGenerator
 from functools import wraps
 from pathlib import Path
 
 from git_interface.exceptions import BufferedProcessError
-from quart import Blueprint, abort, make_response, request, current_app
+from quart import Blueprint, abort, current_app, make_response, request
 from quart_auth import basic_auth_required as git_auth_required
 
 from ..helpers import safe_combine_full_dir_repo
@@ -86,16 +85,7 @@ async def request_body_uncompressed() -> bytes:
         parse_form_data=False
     )
 
-    if request.headers.get("HTTP_CONTENT_ENCODING") == "gzip":
-        return gzip.decompress(raw_data)
-
     return raw_data
-
-
-@blueprint.get("/<repo_dir>/<repo_name>.git")
-async def get_repo_url():
-    # this is just a fake route for url_for to use
-    abort(404)
 
 
 @blueprint.post("/<repo_dir>/<repo_name>.git/git-<pack_type>-pack")
