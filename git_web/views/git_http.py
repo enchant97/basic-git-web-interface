@@ -4,15 +4,26 @@ Methods for supporting git's 'Smart HTTP' protocol
 import asyncio
 import gzip
 from collections.abc import AsyncGenerator
+from functools import wraps
 from pathlib import Path
 
 from git_interface.exceptions import BufferedProcessError
-from quart import Blueprint, abort, make_response, request
+from quart import Blueprint, abort, make_response, request, current_app
 from quart_auth import basic_auth_required as git_auth_required
 
 from ..helpers import safe_combine_full_dir_repo
+from ..helpers.config import get_config
 
 blueprint = Blueprint("git_http", __name__)
+
+
+def require_http_git_enabled(func):
+    @wraps(func)
+    async def wrapper(*args, **kwargs):
+        if get_config().HTTP_GIT_ENABLED:
+            return await current_app.ensure_async(func)(*args, **kwargs)
+        abort(404, "The service 'Git Smart HTTP' has been disabled")
+    return wrapper
 
 
 async def process_pack_exchange(
@@ -82,6 +93,7 @@ async def request_body_uncompressed() -> bytes:
 
 
 @blueprint.post("/<repo_dir>/<repo_name>.git/git-<pack_type>-pack")
+@require_http_git_enabled
 @git_auth_required()
 async def post_pack(repo_dir: str, repo_name: str, pack_type: str):
     if pack_type not in ("upload", "receive"):
@@ -103,6 +115,7 @@ async def post_pack(repo_dir: str, repo_name: str, pack_type: str):
 
 
 @blueprint.get("/<repo_dir>/<repo_name>.git/info/refs")
+@require_http_git_enabled
 @git_auth_required()
 async def get_info_refs(repo_dir: str, repo_name: str):
     repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)

@@ -4,3 +4,4 @@ git-interface==0.7.1
 web-health-checker==1.1.2
 markdown-it-py[linkify]==2.0.1
 pygments==2.11.2
+pydantic[dotenv]==1.9.0
