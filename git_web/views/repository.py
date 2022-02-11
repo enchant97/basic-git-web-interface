@@ -26,9 +26,10 @@ from ..helpers import (MAX_BLOB_SIZE, UnknownBranchName, create_ssh_uri,
                        is_commit_hash, is_name_reserved, is_valid_clone_url,
                        is_valid_directory_name, is_valid_repo_name,
                        path_to_tree_components, pathlib_delete_ro_file,
-                       render_markdown, safe_combine_full_dir,
-                       safe_combine_full_dir_repo)
-from ..helpers.calculations import create_git_http_uri
+                       render_markdown, safe_combine_full_dir)
+from ..helpers.calculations import (create_git_http_uri,
+                                    safe_combine_full_dir_repo)
+from ..helpers.requests import ensure_repo_path_valid
 from ..helpers.views import get_repo_view_content, try_get_readme
 
 blueprint = Blueprint("repository", __name__)
@@ -157,9 +158,7 @@ async def post_import_repo():
 @login_required
 async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
     try:
-        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-        if not repo_path.exists():
-            abort(404)
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
         ssh_url = create_ssh_uri(repo_path)
         http_url = create_git_http_uri(repo_path)
@@ -168,7 +167,7 @@ async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
         commit_count = await get_commit_count(repo_path, repo_content.tree_ish)
 
         readme_content = await try_get_readme(repo_path, repo_dir, repo_name, repo_content)
-    except (ValueError, UnknownBranchName):
+    except UnknownBranchName:
         abort(404)
     else:
         return await render_template(
@@ -194,9 +193,7 @@ async def repo_view(repo_dir: str, repo_name: str, tree_ish: str):
 @login_required
 async def get_repo_tree(repo_dir: str, repo_name: str, tree_ish: str, tree_path: str):
     try:
-        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-        if not repo_path.exists():
-            abort(404)
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
         if not tree_path.endswith("/"):
             tree_path += "/"
@@ -205,7 +202,7 @@ async def get_repo_tree(repo_dir: str, repo_name: str, tree_ish: str, tree_path:
 
         split_path = path_to_tree_components(Path(tree_path))
 
-    except (ValueError, UnknownBranchName):
+    except UnknownBranchName:
         abort(404)
     else:
         return await render_template(
@@ -227,9 +224,7 @@ async def get_repo_tree(repo_dir: str, repo_name: str, tree_ish: str, tree_path:
 @login_required
 async def get_repo_blob_file(repo_dir: str, repo_name: str, tree_ish: str, file_path: str):
     try:
-        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-        if not repo_path.exists():
-            abort(404)
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
         file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
         repo_content = await get_repo_view_content(tree_ish, repo_path, file_path)
@@ -285,7 +280,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, tree_ish: str, file_
                 content=content,
                 split_path=split_path
         )
-    except (ValueError, PathDoesNotExistInRevException):
+    except PathDoesNotExistInRevException:
         abort(404)
 
 
@@ -293,9 +288,7 @@ async def get_repo_blob_file(repo_dir: str, repo_name: str, tree_ish: str, file_
 @login_required
 async def get_repo_raw_file(repo_dir: str, repo_name: str, tree_ish: str, file_path: str):
     try:
-        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-        if not repo_path.exists():
-            abort(404)
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
         file_path = file_path.replace("\\", "/")  # fixes issue when running server on Windows
 
@@ -305,16 +298,14 @@ async def get_repo_raw_file(repo_dir: str, repo_name: str, tree_ish: str, file_p
         raw_response.mimetype = mimetype if mimetype is not None else "application/octet-stream"
 
         return raw_response
-    except (ValueError, PathDoesNotExistInRevException):
+    except PathDoesNotExistInRevException:
         abort(404)
 
 
 @blueprint.get("/<repo_dir>/<repo_name>/settings")
 @login_required
 async def repo_settings(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
     head = None
     branches = None
@@ -338,11 +329,9 @@ async def repo_settings(repo_dir: str, repo_name: str):
 @blueprint.post("/<repo_dir>/<repo_name>/change-head")
 @login_required
 async def post_repo_change_head(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
-
     try:
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
+
         new_head = (await request.form)["repo-head"]
 
         head, branches = await get_branches(repo_path)
@@ -367,11 +356,9 @@ async def post_repo_change_head(repo_dir: str, repo_name: str):
 @blueprint.post("/<repo_dir>/<repo_name>/new-branch")
 @login_required
 async def repo_branch_new(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
-
     try:
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
+
         branch_name = (await request.form)["branch-name-new"]
         branch_name = branch_name.strip().replace(" ", "-")
 
@@ -391,11 +378,9 @@ async def repo_branch_new(repo_dir: str, repo_name: str):
 @blueprint.post("/<repo_dir>/<repo_name>/delete-branch")
 @login_required
 async def repo_branch_delete(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
-
     try:
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
+
         branch_name = (await request.form)["branch-name-delete"]
 
         if not is_valid_repo_name(branch_name):
@@ -414,9 +399,8 @@ async def repo_branch_delete(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/delete", methods=["GET"])
 @login_required
 async def repo_delete(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
+
     shutil.rmtree(repo_path, onerror=pathlib_delete_ro_file)
     return redirect(url_for("directory.repo_list", directory=repo_dir))
 
@@ -424,9 +408,7 @@ async def repo_delete(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/set-description", methods=["POST"])
 @login_required
 async def repo_set_description(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
     try:
         new_description: str = (await request.form)["repo-description"]
@@ -442,9 +424,7 @@ async def repo_set_description(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/set-name", methods=["POST"])
 @login_required
 async def repo_set_name(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
     try:
         new_name: str = (await request.form)["repo-name"]
@@ -467,9 +447,8 @@ async def repo_set_name(repo_dir: str, repo_name: str):
 @blueprint.route("/<repo_dir>/<repo_name>/maintenance")
 @login_required
 async def repo_maintenance_run(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
+
     await run_maintenance(repo_path)
     await flash("maintenance running", "ok")
     return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
@@ -479,9 +458,7 @@ async def repo_maintenance_run(repo_dir: str, repo_name: str):
 @login_required
 async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
     try:
-        repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-        if not repo_path.exists():
-            abort(404)
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
         head = None
         branches = None
@@ -537,15 +514,12 @@ async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
 @login_required
 async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     try:
-        ArchiveTypes(archive_type)
+        _ = ArchiveTypes(archive_type)
+        repo_path = ensure_repo_path_valid(repo_dir, repo_name)
+
+        content = get_archive_buffered(repo_path, archive_type)
+        response = await make_response(content)
+        response.mimetype = "application/" + archive_type
+        return response
     except ValueError:
         abort(404)
-
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
-
-    content = get_archive_buffered(repo_path, archive_type)
-    response = await make_response(content)
-    response.mimetype = "application/" + archive_type
-    return response

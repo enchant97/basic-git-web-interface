@@ -11,7 +11,7 @@ from git_interface.exceptions import BufferedProcessError
 from quart import Blueprint, abort, current_app, make_response, request
 from quart_auth import basic_auth_required as git_auth_required
 
-from ..helpers import safe_combine_full_dir_repo
+from ..helpers.requests import ensure_repo_path_valid
 from ..helpers.config import get_config
 
 blueprint = Blueprint("git_http", __name__)
@@ -78,9 +78,7 @@ async def process_pack_exchange(
 async def post_pack(repo_dir: str, repo_name: str, pack_type: str):
     if pack_type not in ("upload", "receive"):
         abort(404)
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
     async with timeout(current_app.config["BODY_TIMEOUT"]):
         response = await make_response(process_pack_exchange(
@@ -99,9 +97,7 @@ async def post_pack(repo_dir: str, repo_name: str, pack_type: str):
 @require_http_git_enabled
 @git_auth_required()
 async def get_info_refs(repo_dir: str, repo_name: str):
-    repo_path = safe_combine_full_dir_repo(repo_dir, repo_name)
-    if not repo_path.exists():
-        abort(404)
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
     pack_type = request.args.get("service")
 

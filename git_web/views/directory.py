@@ -2,8 +2,10 @@ from quart import Blueprint, abort, redirect, render_template, request, url_for
 from quart.helpers import flash
 from quart_auth import login_required
 
-from ..helpers import (does_path_contain, find_repos, is_name_reserved,
-                       is_valid_directory_name, safe_combine_full_dir)
+from ..helpers.calculations import find_repos, safe_combine_full_dir
+from ..helpers.checkers import (does_path_contain, is_name_reserved,
+                                is_valid_directory_name)
+from ..helpers.requests import ensure_repo_dir_path_valid
 
 blueprint = Blueprint("directory", __name__)
 
@@ -43,14 +45,11 @@ async def post_new_dir():
 @blueprint.get("/<directory>/delete")
 @login_required
 async def get_dir_delete(directory: str):
-    full_path = safe_combine_full_dir(directory)
-    if not full_path.exists():
-        await flash("Directory does not exist", "error")
-        return redirect(url_for("home.index"))
+    directory_absolute = ensure_repo_dir_path_valid(directory)
     try:
-        next(full_path.iterdir())
+        next(directory_absolute.iterdir())
     except StopIteration:
-        full_path.rmdir()
+        directory_absolute.rmdir()
     else:
         await flash("Directory not empty", "error")
         return redirect(url_for(".repo_list", directory=directory))
@@ -62,7 +61,9 @@ async def get_dir_delete(directory: str):
 async def repo_list(directory):
     search_query = request.args.get("q", "").strip()
 
-    repo_paths = find_repos(safe_combine_full_dir(directory), True)
+    directory_absolute = ensure_repo_dir_path_valid(directory)
+
+    repo_paths = find_repos(directory_absolute, True)
 
     if search_query:
         # only filter repo list if search was entered
