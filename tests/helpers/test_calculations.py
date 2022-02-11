@@ -53,6 +53,14 @@ class TestCalculations:
         actual = calc.create_ssh_uri(full_path)
         assert expected == actual
 
+    def test_create_http_uri(self, app_config: Config):
+        repo_name = "pytest-ssh-uri-test.git"
+        repo_dir = "pytest-tests"
+        full_path = app_config.REPOS_PATH / repo_dir / repo_name
+        expected = app_config.REPOS_HTTP_BASE + f"/{repo_dir}/{repo_name}"
+        actual = calc.create_git_http_uri(full_path)
+        assert expected == actual
+
     def test_safe_combine_full_dir(self, app_config: Config):
         repo_dir = "pytest-tests"
         expected = app_config.REPOS_PATH / repo_dir
