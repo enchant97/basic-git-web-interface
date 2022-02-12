@@ -2,12 +2,21 @@ from quart import Blueprint, abort, redirect, render_template, request, url_for
 from quart.helpers import flash
 from quart_auth import login_required
 
-from ..helpers.calculations import find_repos, safe_combine_full_dir
+from ..helpers.calculations import find_dirs, find_repos, safe_combine_full_dir
 from ..helpers.checkers import (does_path_contain, is_name_reserved,
                                 is_valid_directory_name)
 from ..helpers.requests import ensure_repo_dir_path_valid
 
 blueprint = Blueprint("directory", __name__)
+
+
+@blueprint.get("/explore")
+@login_required
+async def get_dir_list():
+    return await render_template(
+        "directory/directories.html",
+        dir_paths=sorted(find_dirs()),
+    )
 
 
 @blueprint.get("/new-dir")

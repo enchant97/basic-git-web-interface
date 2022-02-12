@@ -3,7 +3,7 @@
 {% block main %}
 <div class="sub down">
     {% for path in dir_paths %}
-    <a href="{{ url_for('.repo_list', directory=path) }}" class="bnt">{{ path }}</a>
+    <a href="{{ url_for('directory.repo_list', directory=path) }}" class="bnt">{{ path }}</a>
     {% endfor %}
 </div>
 {% endblock %}

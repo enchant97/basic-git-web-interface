@@ -3,17 +3,14 @@ from quart.helpers import flash
 from quart_auth import login_required
 from werkzeug.exceptions import abort
 
-from ..helpers import find_dirs, get_config
+from ..helpers import get_config
 
 blueprint = Blueprint("home", __name__)
 
 
 @blueprint.get("/")
 async def index():
-    return await render_template(
-        "home/index.html",
-        dir_paths=sorted(find_dirs())
-    )
+    return await render_template("home/index.html")
 
 
 @blueprint.get("/settings")

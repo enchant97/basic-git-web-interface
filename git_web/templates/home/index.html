@@ -1,14 +1,6 @@
 {% extends "/shared/base.html" %}
 {% block title %}Home{% endblock %}
 {% block main %}
-{% if current_user.is_authenticated %}
-<section class="sub down">
-    <h2>Directories</h2>
-    {% for path in dir_paths %}
-    <a href="{{ url_for('directory.repo_list', directory=path) }}" class="bnt">{{ path }}</a>
-    {% endfor %}
-</section>
-{% else %}
 <section id="welcome-panel" class="sub down">
     <img src="{{ url_for('static', filename='icon-256.png') }}" alt="app icon">
     <h1>Basic Git Web Interface</h1>
@@ -28,6 +20,9 @@
     </ul>
 </section>
 
+{% if current_user.is_authenticated %}
+<p class="sub">Go <a href="{{ url_for('directory.get_dir_list') }}">Explore</a></p>
+{% else %}
 <p class="sub">To use this service please <a href="{{ url_for('auth.get_login') }}">login</a>.</p>
 {% endif %}
 
