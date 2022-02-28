@@ -16,4 +16,4 @@ async def test_index_authenticated(app: Quart):
     async with test_client.authenticated("1"):
         response = await test_client.get("/")
         assert response.status_code == 200
-        assert "Directories" in await response.get_data(as_text=True)
+        assert "Log Out" in await response.get_data(as_text=True)
