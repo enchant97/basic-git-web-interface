@@ -55,7 +55,7 @@ All configs are handled through environment variables.
 > DISALLOWED_DIRS must be a JSON array be e.g. DISALLOWED_DIRS=[".ssh", "my-secrets"]
 
 ## Git HTTP Access
-To access it you need a git client that supports the smart protocol, dumb is **not** supported. To login, use 'admin' as username and the 'LOGIN_PASSWORD' value as the password. If you do not want the inbuilt Git HTTP access you can turn it off in the config.
+To access it you need a git client that supports the smart protocol, dumb is **not** supported. To login, use 'git' as username and the 'LOGIN_PASSWORD' value as the password. If you do not want the inbuilt Git HTTP access you can turn it off in the config.
 
 ## License
 The licenses for this project can be found in the `LICENSE` file.
