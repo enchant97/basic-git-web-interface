@@ -8,14 +8,17 @@ endblock %}
 {% block main %}
 <div class="main down">
     <div class="control-bar">
-        {{ tree_ish_select('.get_repo_tree', 'tree-ish-select', "Branch/Tree", head, curr_tree_ish, branches, tags, tree_path=tree_path) }}
+        {{ tree_ish_select('.get_repo_tree', 'tree-ish-select', "Branch/Tree", head, curr_tree_ish, branches, tags,
+        tree_path=tree_path) }}
         <span>
             <a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a> /
             {% for component in split_path %}
             {% if component.is_end %}
             <span>{{ component.name }}</span>
             {% else %}
-            <a href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, tree_path=component.full_path) }}">{{ component.name }}</a>
+            <a
+                href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, tree_path=component.full_path) }}">{{
+                component.name }}</a>
             {% endif %}
             /
             {% endfor %}
@@ -26,7 +29,8 @@ endblock %}
             <div class="tree-nav">
                 <div>
                     <a href="mailto:{{ recent_log.author_email }}">{{ recent_log.author_email|truncate(12) }}</a>
-                    <span title="{{ recent_log.subject }}">{{ recent_log.subject|truncate(30) }}</span>
+                    <a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, tree_ish=recent_log.commit_hash) }}"
+                        title="{{ recent_log.subject }}">{{ recent_log.subject|truncate(30) }}</a>
                 </div>
                 {% if head %}
                 <a href="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish) }}"

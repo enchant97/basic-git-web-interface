@@ -19,6 +19,7 @@ endblock %}
             <tr>
                 <th>Subject</th>
                 <th>Hash</th>
+                <th>When</th>
                 <th></th>
             </tr>
         </thead>
@@ -29,6 +30,7 @@ endblock %}
                 <td title="{{ log.commit_hash }}"><button onclick="copy_to_clipboard('{{ log.commit_hash }}')"
                         title="Copy Commit Hash">{{ macros.feather_img('copy') }}</button>{{
                     log.commit_hash|truncate(10) }}</td>
+                <td title="{{ log.commit_date }}">{{ log.commit_date.strftime("%Y-%m-%d") }}</td>
                 <td><a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, tree_ish=log.commit_hash) }}"
                         title="Browse Repository At This Point">{{ macros.feather_img('code') }}</a></td>
             </tr>

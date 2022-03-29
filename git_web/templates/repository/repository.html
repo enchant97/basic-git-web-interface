@@ -3,7 +3,8 @@
 {% block title %}{{ repo_dir }}/{{ repo_name }}{% endblock %}
 {% block title2 %}Repository{% endblock %}
 {% block header_one %}<a href="{{ url_for('directory.repo_list', directory=repo_dir) }}">{{ repo_dir }}</a> / <a
-    href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish) }}">{{ repo_name }}</a>{%
+    href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish) }}">{{ repo_name
+    }}</a>{%
 endblock %}
 {% block main %}
 <div class="repo">
@@ -17,11 +18,13 @@ endblock %}
                 <div class="tree-nav">
                     <div>
                         <a href="mailto:{{ recent_log.author_email }}">{{ recent_log.author_email|truncate(12) }}</a>
-                        <span title="{{ recent_log.subject }}">{{ recent_log.subject|truncate(30) }}</span>
+                        <a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, tree_ish=recent_log.commit_hash) }}"
+                            title="{{ recent_log.subject }}">{{ recent_log.subject|truncate(30) }}</a>
                     </div>
                     {% if head %}
                     <a href="{{ url_for('.repo_commit_log', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish) }}"
-                        class="bnt" title="Commit Log">{{ macros.feather_img('list') }}<strong>{{ commit_count }}</strong></a>
+                        class="bnt" title="Commit Log">{{ macros.feather_img('list') }}<strong>{{ commit_count
+                            }}</strong></a>
                     {% endif %}
                 </div>
                 {% include "/shared/includes/tree.html" %}
@@ -43,9 +46,9 @@ endblock %}
         <div class="down">
             <h3>Clone</h3>
             <label for="repo-ssh-url">SSH:</label>
-            <input id="repo-ssh-url" style="width: 135px;" type="text" value="{{ ssh_url }}" readonly>
+            <input id="repo-ssh-url" type="text" value="{{ ssh_url }}" readonly>
             <label for="repo-http-url">HTTP:</label>
-            <input id="repo-http-url" style="width: 135px;" type="text" value="{{ http_url }}" readonly>
+            <input id="repo-http-url" type="text" value="{{ http_url }}" readonly>
         </div>
         <div>
             <h3>Download</h3>

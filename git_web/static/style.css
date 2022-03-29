@@ -309,6 +309,11 @@ table.tree-objects tbody tr td a:hover {
   max-width: 200px;
 }
 
+#repo-ssh-url,
+#repo-http-url {
+  width: 90%;
+}
+
 @media(min-width:1000px) {
   .repo .aside {
     max-width: 35%;
