@@ -14,29 +14,28 @@ endblock %}
     {% if logs|length == 0 %}
     <h3>No Commits Found</h3>
     {% else %}
-    <table>
-        <thead>
-            <tr>
-                <th>Subject</th>
-                <th>Hash</th>
-                <th>When</th>
-                <th></th>
-            </tr>
-        </thead>
+    <table id="commit-log">
+        <thead></thead>
         <tbody>
             {% for log in logs -%}
             <tr>
-                <td title="{{ log.subject }}">{{ log.subject|truncate(55) }}</td>
+                <td>
+                    <div title="{{ log.subject }}">{{ log.subject|truncate(55) }}</div>
+                    <div class="sm-text">
+                        <a href="mailto:{{ log.author_email }}">{{ log.author_email|truncate(12) }}</a>
+                        <span title="{{ log.commit_date }}">{{ log.commit_date.strftime("%Y-%m-%d") }}</span>
+                    </div>
+                </td>
                 <td title="{{ log.commit_hash }}"><button onclick="copy_to_clipboard('{{ log.commit_hash }}')"
                         title="Copy Commit Hash">{{ macros.feather_img('copy') }}</button>{{
                     log.commit_hash|truncate(10) }}</td>
-                <td title="{{ log.commit_date }}">{{ log.commit_date.strftime("%Y-%m-%d") }}</td>
                 <td><a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name, tree_ish=log.commit_hash) }}"
                         title="Browse Repository At This Point">{{ macros.feather_img('code') }}</a></td>
             </tr>
             {% endfor -%}
         </tbody>
     </table>
+    <br>
     <div>
         {% if last_commit_hash %}
         <a class="bnt"

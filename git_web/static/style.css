@@ -141,6 +141,7 @@ form,
 table {
   text-align: left;
   width: 100%;
+  border-collapse: collapse;
 }
 
 footer {
@@ -250,6 +251,10 @@ footer {
   margin-left: auto;
 }
 
+.sm-text {
+  font-size: 0.8em;
+}
+
 table.tree-objects {
   font-size: 0.9em;
   display: table-row;
@@ -314,6 +319,14 @@ table.tree-objects tbody tr td a:hover {
   width: 90%;
 }
 
+#commit-log tbody tr {
+  border: .15rem solid var(--bnt-col);
+}
+
+#commit-log td {
+  padding: 8px;
+}
+
 @media(min-width:1000px) {
   .repo .aside {
     max-width: 35%;
@@ -327,5 +340,13 @@ table.tree-objects tbody tr td a:hover {
 
   .repo .aside {
     max-width: 100%;
+  }
+
+  #commit-log tr td {
+    display: none;
+  }
+
+  #commit-log tr td:nth-child(1) {
+    display: initial;
   }
 }
