@@ -10,19 +10,24 @@ endblock %}
     <div class="control-bar">
         {{ tree_ish_select('.get_repo_tree', 'tree-ish-select', "Branch/Tree", head, curr_tree_ish, branches, tags,
         tree_path=tree_path) }}
-        <span>
-            <a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a> /
-            {% for component in split_path %}
-            {% if component.is_end %}
-            <span>{{ component.name }}</span>
-            {% else %}
-            <a
-                href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, tree_path=component.full_path) }}">{{
-                component.name }}</a>
-            {% endif %}
-            /
-            {% endfor %}
-        </span>
+        <nav aria-label="repo breadcrumb navigation">
+            <ol class="breadcrumb">
+                <li>
+                    <a href="{{ url_for('.repo_view', repo_dir=repo_dir, repo_name=repo_name) }}">{{ repo_name }}</a>
+                </li>
+                {% for component in split_path %}
+                {% if component.is_end %}
+                <li class="active" aria-current="page">{{ component.name }}</li>
+                {% else %}
+                <li>
+                    <a
+                        href="{{ url_for('.get_repo_tree', repo_dir=repo_dir, repo_name=repo_name, tree_ish=curr_tree_ish, tree_path=component.full_path) }}">{{
+                        component.name }}</a>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ol>
+        </nav>
     </div>
     <div class="down">
         <div class="panel">

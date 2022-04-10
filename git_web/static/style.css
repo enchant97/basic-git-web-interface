@@ -251,6 +251,26 @@ footer {
   margin-left: auto;
 }
 
+.breadcrumb {
+  padding: 2px;
+  list-style: none;
+}
+
+.breadcrumb>li {
+  display: inline;
+}
+
+ol.breadcrumb>li+li:before {
+  padding: 0 5px;
+  content: "/";
+}
+
+ol.breadcrumb li.active {
+  text-decoration: none;
+  user-select: none;
+  color: var(--font-dark);
+}
+
 .sm-text {
   font-size: 0.8em;
 }
