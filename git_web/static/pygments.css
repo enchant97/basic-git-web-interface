@@ -1,0 +1,47 @@
+/*
+Code Styling
+
+originally generated using: 'pygmentize -S default -f html > pygments.css
+*/
+.k,
+.ch,
+.cp,
+.cpf,
+.cs {
+  color: #14832f;
+}
+
+.kc,
+.kd,
+.kn,
+.kp,
+.kr,
+.ow,
+.mi {
+  color: #c42d2d;
+}
+
+.kt,
+.nb,
+.nc {
+  color: #1a6bb8;
+}
+
+.cm,
+.c1,
+.s,
+.sa,
+.sb,
+.sc,
+.dl,
+.sd,
+.s2,
+.se,
+.sh,
+.si,
+.sx,
+.sr,
+.s1,
+.ss {
+  color: #527275;
+}
