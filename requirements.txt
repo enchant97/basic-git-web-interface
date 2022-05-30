@@ -1,7 +1,7 @@
 quart==0.17.0
 quart-auth==0.6.0
 git-interface[quart]==0.8.0
-web-health-checker==1.1.2
+web-health-checker==1.2.0
 markdown-it-py[linkify]==2.0.1
 pygments==2.11.2
 pydantic[dotenv]==1.9.0
