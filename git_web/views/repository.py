@@ -515,10 +515,10 @@ async def repo_commit_log(repo_dir: str, repo_name: str, tree_ish: str):
 @login_required
 async def repo_archive(repo_dir: str, repo_name: str, archive_type: str):
     try:
-        _ = ArchiveTypes(archive_type)
+        archive_type_type = ArchiveTypes(archive_type)
         repo_path = ensure_repo_path_valid(repo_dir, repo_name)
 
-        content = get_archive_buffered(repo_path, archive_type)
+        content = get_archive_buffered(repo_path, archive_type_type)
         response = await make_response(content)
         response.mimetype = "application/" + archive_type
         return response
