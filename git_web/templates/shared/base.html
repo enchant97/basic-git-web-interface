@@ -9,10 +9,11 @@
     <title>{% block title2 %}{% endblock %} {% block title %}{% endblock %} | Basic Git Web Interface</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&family=Open+Sans&family=Roboto&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Mono&family=Open+Sans&family=Roboto&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='pygments.css') }}">
-    <script src="{{ url_for('static', filename='theme-changer.js') }}"></script>
+    <script src="{{ url_for('static', filename='theme-changer.min.js') }}"></script>
     <script src="{{ url_for('static', filename='script.js') }}" defer></script>
 </head>
 
@@ -29,7 +30,8 @@
             <a href="{{ url_for('home.get_settings') }}" class="bnt" title="Settings">{{ macros.feather_img('settings')
                 }}</a>
             {% endif %}
-            <button id="themeToggleBnt" title="Change Site Theme">{{ macros.feather_img('sun') }}</button>
+            <button class="bnt hidden" id="themeToggleBnt" title="Theme Picker">{{ macros.feather_img('sun') }}|{{
+                macros.feather_img('moon') }}</button>
             {% block nav %}{% endblock %}
             {% if current_user.is_authenticated %}
             <a href="{{ url_for('auth.do_logout') }}" class="bnt">{{ macros.feather_img('log-out') }} Log Out</a>

@@ -11,27 +11,13 @@ async function copy_to_clipboard(text) {
     }
 }
 
-// Setup site theme
-ThemeChanger.theme_meta.light[1] = [
-    ["--font-dark", "black"],
-    ["--font-light", "#f0f0f0"],
-    ["--bg-col", "#c4c4c4"],
-    ["--bg-sub-col", "#cbcbcb"],
-    ["--bnt-col", "#666666"],
-];
-ThemeChanger.theme_meta.dark[1] = [
-    ["--font-dark", "var(--font-light)"],
-    ["--font-light", "#bebebe"],
-    ["--bg-col", "#262626"],
-    ["--bg-sub-col", "#242424"],
-    ["--bnt-col", "#3d3d3d"],
-];
+// Theme picker setup
 ThemeChanger.theme_picker_parent = document.querySelector("main");
-
-document.getElementById("themeToggleBnt").addEventListener("click", _ => {
-    ThemeChanger.toggle_theme_picker();
-});
-
+ThemeChanger.use_local = true;
+ThemeChanger.selected_theme_css_class = "current";
+const themeToggleBnt = document.getElementById("themeToggleBnt");
+themeToggleBnt.addEventListener("click", ThemeChanger.toggle_theme_picker);
+themeToggleBnt.classList.remove("hidden");
 ThemeChanger.on_load();
 
 // Setup removing expired "flashes"

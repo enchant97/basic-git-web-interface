@@ -1,23 +1,53 @@
 :root {
-  --font-dark: black;
-  --font-light: #f0f0f0;
-  --bg-col: #c4c4c4;
-  --bg-sub-col: #cbcbcb;
-  --bnt-col: #666666;
   --border-rad: 10px;
   --header-font: 'Roboto', sans-serif;
   --main-font: 'Open Sans', sans-serif;
   --code-font: 'Fira Mono', monospace;
+
+  --font-dark--light: black;
+  --font-light--light: white;
+  --font-dark--dark: var(--font-light--dark);
+  --font-light--dark: #bebebe;
+
+  --bg-col--light: #c4c4c4;
+  --bg-sub-col--light: #cbcbcb;
+  --bnt-col--light: #666666;
+  --bg-col--dark: #262626;
+  --bg-sub-col--dark: #242424;
+  --bnt-col--dark: #3d3d3d;
+
+
+  --font-dark: var(--font-dark--light);
+  --font-light: var(--font-light--light);
+  --bg-col: var(--bg-col--light);
+  --bg-sub-col: var(--bg-sub-col--light);
+  --bnt-col: var(--bnt-col--light);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --font-dark: var(--font-light);
-    --font-light: #bebebe;
-    --bg-col: #262626;
-    --bg-sub-col: #242424;
-    --bnt-col: #3d3d3d;
+    --font-dark: var(--font-dark--dark);
+    --font-light: var(--font-light--dark);
+    --bg-col: var(--bg-col--dark);
+    --bg-sub-col: var(--bg-sub-col--dark);
+    --bnt-col: var(--bnt-col--dark);
   }
+}
+
+[data-theme=light]:root {
+  --font-dark: var(--font-dark--light);
+  --font-light: var(--font-light--light);
+  --bg-col: var(--bg-col--light);
+  --bg-sub-col: var(--bg-sub-col--light);
+  --bnt-col: var(--bnt-col--light);
+}
+
+[data-theme=dark]:root {
+  --font-dark: var(--font-dark--dark);
+  --font-light: var(--font-light--dark);
+  --bg-col: var(--bg-col--dark);
+  --bg-sub-col: var(--bg-sub-col--dark);
+  --bnt-col: var(--bnt-col--dark);
 }
 
 ::-webkit-scrollbar {
@@ -149,6 +179,10 @@ footer {
   margin-top: 100px;
   border-top-style: solid;
   padding-top: 10px;
+}
+
+.hidden {
+  display: none;
 }
 
 .flashes {
@@ -291,7 +325,24 @@ table.tree-objects tbody tr td a:hover {
 }
 
 #theme-picker-selector {
-  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: .3rem;
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  background-color: #00000091;
+  backdrop-filter: blur(4px);
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+#theme-picker-selector button {
+  padding: 1rem 2rem;
 }
 
 #theme-picker-selector .current {
@@ -368,5 +419,13 @@ table.tree-objects tbody tr td a:hover {
 
   #commit-log tr td:nth-child(1) {
     display: initial;
+  }
+
+  #theme-picker-selector {
+    flex-direction: column;
+  }
+
+  #theme-picker-selector button {
+    min-width: 50%;
   }
 }
