@@ -1,8 +1,10 @@
 import shutil
 from pathlib import Path
 
+from git_interface.archive import get_archive_buffered
 from git_interface.branch import delete_branch, get_branches, new_branch
 from git_interface.cat_file import get_object_size
+from git_interface.datatypes import ArchiveTypes
 from git_interface.exceptions import (AlreadyExistsException, GitException,
                                       NoBranchesException,
                                       PathDoesNotExistInRevException,
@@ -13,9 +15,8 @@ from git_interface.rev_list import get_commit_count
 from git_interface.show import show_file, show_file_buffered
 from git_interface.symbolic_ref import change_active_branch
 from git_interface.tag import list_tags
-from git_interface.utils import (ArchiveTypes, clone_repo,
-                                 get_archive_buffered, get_description,
-                                 init_repo, run_maintenance, set_description)
+from git_interface.utils import (clone_repo, get_description, init_repo,
+                                 run_maintenance, set_description)
 from quart import (Blueprint, abort, make_response, redirect, render_template,
                    request, url_for)
 from quart.helpers import flash
