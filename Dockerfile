@@ -1,4 +1,6 @@
-FROM python:3.10-slim-bullseye as builder
+ARG PYTHON_VERSION=3.10
+
+FROM python:${PYTHON_VERSION}-slim as builder
 
 WORKDIR /app
 
@@ -9,7 +11,7 @@ RUN python -m venv .venv
 # also allow for DOCKER_BUILDKIT=1 to be used
 RUN --mount=type=cache,target=/root/.cache ./.venv/bin/pip install -r requirements.txt
 
-FROM python:3.10-alpine3.15
+FROM python:${PYTHON_VERSION}-alpine3.16
 
 WORKDIR /app
 EXPOSE 8000
