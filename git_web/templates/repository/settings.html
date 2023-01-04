@@ -56,7 +56,7 @@ endblock %}
             <div>
                 <select name="branch-name-delete" id="branch-name-delete" required>
                     {% if head %}
-                    <option>**  Select A Branch **</option>
+                    <option>** Select A Branch **</option>
                     {% for name in branches %}
                     <option value="{{ name }}">{{ name }}</option>
                     {% endfor %}
@@ -78,6 +78,21 @@ endblock %}
     </section>
     <section class="panel down">
         <h1>Danger</h1>
+        <form class="button-option" action="{{ url_for('.repo_move', repo_dir=repo_dir, repo_name=repo_name) }}"
+            method="POST">
+            <p>Move repository</p>
+            <div>
+                <select name="directory" id="repo-move-directory" required>
+                    <option value="">** Select A Directory **</option>
+                    {% for name in dir_paths %}
+                    {% if name != repo_dir %}
+                    <option value="{{ name }}">{{ name }}</option>
+                    {% endif %}
+                    {% endfor %}
+                </select>
+                <button type="submit">Move</button>
+            </div>
+        </form>
         <div class="button-option">
             <p>Deletes the repository</p>
             <a href="{{ url_for('.repo_delete', repo_dir=repo_dir, repo_name=repo_name) }}" class="bnt">{{

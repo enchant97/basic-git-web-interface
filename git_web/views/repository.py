@@ -324,6 +324,7 @@ async def repo_settings(repo_dir: str, repo_name: str):
         head=head,
         branches=branches,
         description=description,
+        dir_paths=find_dirs(),
     )
 
 
@@ -395,6 +396,19 @@ async def repo_branch_delete(repo_dir: str, repo_name: str):
         abort(400, "missing required values")
     finally:
         return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
+
+
+@blueprint.post("/<repo_dir>/<repo_name>/move")
+@login_required
+async def repo_move(repo_dir: str, repo_name: str):
+    repo_path = ensure_repo_path_valid(repo_dir, repo_name)
+    new_dir = (await request.form)["directory"]  # type: str
+    if not is_valid_directory_name(new_dir) or not safe_combine_full_dir(new_dir).exists():
+        await flash("invalid directory given", "error")
+        return redirect(url_for(".repo_settings", repo_dir=repo_dir, repo_name=repo_name))
+    shutil.move(repo_path, safe_combine_full_dir_repo(new_dir, repo_name))
+    await flash(f"moved repository to: {new_dir}/{repo_name}", "ok")
+    return redirect(url_for(".repo_view", repo_dir=new_dir, repo_name=repo_name))
 
 
 @blueprint.route("/<repo_dir>/<repo_name>/delete", methods=["GET"])
