@@ -65,7 +65,7 @@ def is_valid_directory_name(name: str) -> bool:
         :param name: the name to check
         :return: whether given name is valid
     """
-    return is_valid_repo_name(name)
+    return is_valid_repo_name(name) and is_allowed_dir(name)
 
 
 def is_name_reserved(name: str) -> bool:

@@ -40,7 +40,7 @@ class TestCheckers:
         assert checkers.is_valid_repo_name("../breakout/repo-name") is False
         assert checkers.is_valid_repo_name("a"*200) is False
 
-    def test_is_valid_directory_name(self):
+    def test_is_valid_directory_name(self, app_config: Config):
         assert checkers.is_valid_directory_name("my-directory") is True
         assert checkers.is_valid_directory_name("valid") is True
         assert checkers.is_valid_directory_name("valid_underscore") is True
@@ -53,6 +53,7 @@ class TestCheckers:
         assert checkers.is_valid_directory_name("()") is False
         assert checkers.is_valid_directory_name("../breakout/directory-name") is False
         assert checkers.is_valid_repo_name("a"*200) is False
+        assert checkers.is_valid_directory_name(app_config.DISALLOWED_DIRS[0]) is False
 
     def test_is_name_reserved(self):
         assert checkers.is_name_reserved("login") is True

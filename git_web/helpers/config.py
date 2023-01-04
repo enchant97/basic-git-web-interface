@@ -18,7 +18,7 @@ class Config(BaseSettings):
     LOGIN_PASSWORD: str
     SECRET_KEY: str
     DEFAULT_BRANCH: Optional[str] = "main"
-    DISALLOWED_DIRS: Optional[list[str]] = []
+    DISALLOWED_DIRS: list[str] = []
     MAX_COMMIT_LOG_COUNT: Optional[int] = 20
     SSH_PUB_KEY_PATH: Optional[Path] = None
     SSH_AUTH_KEYS_PATH: Optional[Path] = None
