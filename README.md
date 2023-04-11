@@ -58,4 +58,8 @@ All configs are handled through environment variables.
 To access it you need a git client that supports the smart protocol, dumb is **not** supported. To login, use 'git' as username and the 'LOGIN_PASSWORD' value as the password. If you do not want the inbuilt Git HTTP access you can turn it off in the config.
 
 ## License
-The licenses for this project can be found in the `LICENSE` file.
+This project is Copyright (c) 2023 Leo Spratt, licences shown below:
+
+> GPL-3. Full license found in `LICENSE.txt`
+
+This project also uses some third party content, licences for those are found at: `THIRD-PARTY.txt`.
